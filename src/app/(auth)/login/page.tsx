@@ -33,7 +33,7 @@ export default function LoginPage() {
 
             if (data.user) {
                 // Get profile to sync with localStorage
-                const profile = await getCurrentProfile();
+                const profile = await getCurrentProfile() as any;
 
                 // Save basic info to localStorage for backward compatibility/UI sync
                 localStorage.setItem("userProfile", JSON.stringify({
