@@ -53,13 +53,13 @@ export const signOut = async () => {
 /**
  * Get Current User Profile
  */
-export const getCurrentProfile = async () => {
+export const getCurrentProfile = async (): Promise<any> => {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) return null;
 
-    const { data: profile, error } = await supabase
-        .from('profiles')
+    const { data: profile, error } = await (supabase
+        .from('profiles') as any)
         .select('*')
         .eq('id', user.id)
         .single();
