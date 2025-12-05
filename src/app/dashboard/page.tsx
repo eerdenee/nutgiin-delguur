@@ -26,6 +26,7 @@ export default function ProfilePage() {
 
     const [userRole, setUserRole] = useState<'buyer' | 'producer' | 'admin'>('buyer');
     const [isAdmin, setIsAdmin] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [subscription, setSubscription] = useState<any>(null);
     const [subscriptionInfo, setSubscriptionInfo] = useState<ReturnType<typeof getUserSubscription> | null>(null);
     const [adLimitInfo, setAdLimitInfo] = useState<ReturnType<typeof canPostMoreAds> | null>(null);
@@ -42,6 +43,8 @@ export default function ProfilePage() {
                 const { data: { user: authUser } } = await supabase.auth.getUser();
 
                 if (authUser) {
+                    setIsLoggedIn(true);
+
                     // Check if super admin
                     const superAdminStatus = await isSuperAdmin();
                     setIsAdmin(superAdminStatus);
@@ -281,7 +284,7 @@ export default function ProfilePage() {
                         ) : (
                             <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/30 backdrop-blur-sm text-gray-900 border border-white/40 shadow-sm">
                                 <span className="text-xs font-bold">
-                                    {user.phone ? `🛍️ ${t.dashboard.buyer}` : `👤 ${t.dashboard.guest}`}
+                                    {isLoggedIn ? `🛍️ ${t.dashboard.buyer}` : `👤 ${t.dashboard.guest}`}
                                 </span>
                             </div>
                         )}
@@ -387,7 +390,7 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Auth Actions */}
-                {user.phone ? (
+                {isLoggedIn ? (
                     <button
                         onClick={handleLogout}
                         className="w-full mt-6 mb-4 flex items-center justify-center gap-3 px-4 py-4 bg-white rounded-2xl shadow-sm hover:bg-gray-50 active:bg-gray-100 transition-colors border border-gray-100"
