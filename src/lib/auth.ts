@@ -121,3 +121,25 @@ export const isAuthenticated = async (): Promise<boolean> => {
         return false;
     }
 };
+
+/**
+ * Super Admin Emails
+ * Add your email here to get admin access
+ */
+export const SUPER_ADMIN_EMAILS = [
+    'eerdenee1996@gmail.com', // User's email
+    'admin@nutgiindelguur.mn'
+];
+
+/**
+ * Check if current user is Super Admin
+ */
+export const isSuperAdmin = async (): Promise<boolean> => {
+    try {
+        const profile = await getCurrentProfile();
+        if (!profile || !profile.email) return false;
+        return SUPER_ADMIN_EMAILS.includes(profile.email);
+    } catch {
+        return false;
+    }
+};

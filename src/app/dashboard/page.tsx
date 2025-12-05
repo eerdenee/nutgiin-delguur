@@ -23,6 +23,7 @@ export default function ProfilePage() {
     });
 
     const [userRole, setUserRole] = useState<'buyer' | 'producer' | 'admin'>('buyer');
+    const [isAdmin, setIsAdmin] = useState(false);
     const [subscription, setSubscription] = useState<any>(null);
     const [subscriptionInfo, setSubscriptionInfo] = useState<ReturnType<typeof getUserSubscription> | null>(null);
     const [adLimitInfo, setAdLimitInfo] = useState<ReturnType<typeof canPostMoreAds> | null>(null);
@@ -31,13 +32,17 @@ export default function ProfilePage() {
         const loadProfile = async () => {
             try {
                 // Import dynamically to avoid server-side issues
-                const { getCurrentProfile } = await import("@/lib/auth");
+                const { getCurrentProfile, isSuperAdmin } = await import("@/lib/auth");
                 const { supabase } = await import("@/lib/supabase");
 
                 // Get current user from Auth
                 const { data: { user: authUser } } = await supabase.auth.getUser();
 
                 if (authUser) {
+                    // Check if super admin
+                    const superAdminStatus = await isSuperAdmin();
+                    setIsAdmin(superAdminStatus);
+
                     // Try to get profile from DB
                     const profile = await getCurrentProfile();
 
@@ -152,7 +157,7 @@ export default function ProfilePage() {
     };
 
     const menuItems = [
-        ...(userRole === 'admin' ? [
+        ...(isAdmin ? [
             {
                 icon: ShieldCheck,
                 label: "Админ самбар",
