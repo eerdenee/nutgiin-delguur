@@ -127,7 +127,7 @@ export const isAuthenticated = async (): Promise<boolean> => {
  * Add your email here to get admin access
  */
 export const SUPER_ADMIN_EMAILS = [
-    'eerdenee1996@gmail.com', // User's email
+    'eerdenee320@gmail.com', // User's email
     'admin@nutgiindelguur.mn'
 ];
 
