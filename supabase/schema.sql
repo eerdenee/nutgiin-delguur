@@ -117,17 +117,46 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
 );
 
 -- =============================================
--- INDEXES (Performance)
+-- INDEXES (Performance Optimized)
 -- =============================================
+
+-- Full-text search (хайлт 10x хурдан)
 CREATE INDEX IF NOT EXISTS idx_products_search ON products USING GIN(search_vector);
+
+-- Location filter (байршлаар хайх)
 CREATE INDEX IF NOT EXISTS idx_products_location ON products USING GIN(location);
+CREATE INDEX IF NOT EXISTS idx_products_location_aimag ON products((location->>'aimag'));
+
+-- Category filter
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
+
+-- Status filter (зөвхөн идэвхтэй бараа)
 CREATE INDEX IF NOT EXISTS idx_products_status ON products(status) WHERE status = 'active';
+
+-- User's products
 CREATE INDEX IF NOT EXISTS idx_products_user ON products(user_id);
+
+-- Sorting by date (шинэ эхэнд)
 CREATE INDEX IF NOT EXISTS idx_products_created ON products(created_at DESC);
+
+-- Price range filter
+CREATE INDEX IF NOT EXISTS idx_products_price ON products(price);
+
+-- Composite index for common queries (category + location + status)
+CREATE INDEX IF NOT EXISTS idx_products_composite ON products(category, status, created_at DESC) 
+  WHERE status = 'active';
+
+-- Favorites user lookup
 CREATE INDEX IF NOT EXISTS idx_favorites_user ON favorites(user_id);
+CREATE INDEX IF NOT EXISTS idx_favorites_product ON favorites(product_id);
+
+-- Messages for chat
 CREATE INDEX IF NOT EXISTS idx_messages_receiver ON messages(receiver_id, is_read);
 CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(sender_id, receiver_id);
+CREATE INDEX IF NOT EXISTS idx_messages_product ON messages(product_id);
+
+-- Profile phone lookup
+CREATE INDEX IF NOT EXISTS idx_profiles_phone ON profiles(phone);
 
 -- =============================================
 -- FUNCTIONS & TRIGGERS

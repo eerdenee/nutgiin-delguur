@@ -52,11 +52,29 @@ function PostAdContent() {
     // Subscription State
     const [subscription, setSubscription] = useState<ReturnType<typeof getUserSubscription> | null>(null);
     const [adLimitInfo, setAdLimitInfo] = useState<ReturnType<typeof canPostMoreAds> | null>(null);
+    const [phoneFromAuth, setPhoneFromAuth] = useState<string>("");
 
-    // Load subscription info
+    // Load subscription info and user phone from Supabase
     useEffect(() => {
         setSubscription(getUserSubscription());
         setAdLimitInfo(canPostMoreAds());
+
+        // Get user phone from Supabase auth
+        const loadUserPhone = async () => {
+            try {
+                const { supabase } = await import("@/lib/supabase");
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user?.email) {
+                    // Extract phone from email (phone@example.com format)
+                    const phone = user.email.replace('@example.com', '');
+                    setPhoneFromAuth(phone);
+                    setContactPhone(phone);
+                }
+            } catch (err) {
+                console.error("Error loading user phone:", err);
+            }
+        };
+        loadUserPhone();
     }, []);
 
     // Copy function
@@ -209,48 +227,38 @@ function PostAdContent() {
 
         setIsLoading(true);
 
-        // Helper to convert file to base64 with resizing
-        const convertImageToBase64 = (file: File): Promise<string> => {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = (event) => {
-                    const img = new Image();
-                    img.src = event.target?.result as string;
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 800;
-                        const scaleSize = MAX_WIDTH / img.width;
-                        canvas.width = Math.min(img.width, MAX_WIDTH);
-                        canvas.height = img.width > MAX_WIDTH ? img.height * scaleSize : img.height;
-                        const ctx = canvas.getContext('2d');
-                        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        resolve(canvas.toDataURL('image/webp', 0.8));
-                    };
-                };
-                reader.onerror = (error) => reject(error);
-            });
-        };
-
         try {
-            let imageUrls: string[] = [];
-
-            if (images.length > 0) {
-                try {
-                    const promises = images.map(img => convertImageToBase64(img));
-                    imageUrls = await Promise.all(promises);
-                } catch (err) {
-                    console.error("Error converting images:", err);
-                }
-            }
-
-            // Fallback if no images
-            if (imageUrls.length === 0) {
-                imageUrls = ["https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60"];
-            }
-
             const selectedAimag = AIMAGS.find(a => a.id === selectedAimagId);
             const selectedSoum = selectedAimag?.soums.find(s => s.id === selectedSoumId);
+
+            // 1. Upload Images to Cloudflare R2
+            const uploadedImageUrls: string[] = [];
+
+            for (const imageFile of images) {
+                try {
+                    // Use FormData for server-side image optimization
+                    const formData = new FormData();
+                    formData.append('file', imageFile);
+                    formData.append('folder', 'products');
+
+                    const response = await fetch('/api/upload', {
+                        method: 'POST',
+                        body: formData,
+                    });
+
+                    if (!response.ok) throw new Error('Failed to upload image');
+
+                    const { publicUrl, urls } = await response.json();
+
+                    // Use large size URL or fallback to publicUrl
+                    uploadedImageUrls.push(urls?.large || publicUrl);
+                } catch (err) {
+                    console.error('Image upload error:', err);
+                    alert('Зураг хуулахад алдаа гарлаа. Дахин оролдоно уу.');
+                    setIsLoading(false);
+                    return;
+                }
+            }
 
             // ✅ SUPABASE-д хадгалах
             const { createProduct } = await import("@/lib/products");
@@ -261,7 +269,7 @@ function PostAdContent() {
                 price: Number(price),
                 currency: "₮",
                 category: selectedCategory,
-                images: imageUrls,
+                images: uploadedImageUrls,
                 videoLinks: videoLinks.filter(v => v.trim() !== ''),
                 location: {
                     aimag: selectedAimag?.name || "",
@@ -279,15 +287,6 @@ function PostAdContent() {
                 alert(`Алдаа: ${error}`);
                 setIsLoading(false);
                 return;
-            }
-
-            // Update profile with phone if not set
-            if (contactPhone) {
-                const { supabase } = await import("@/lib/supabase");
-                const { data: { user } } = await supabase.auth.getUser();
-                if (user) {
-                    await (supabase.from('profiles') as any).update({ phone: contactPhone }).eq('id', user.id);
-                }
             }
 
             // Dispatch event to update other components
@@ -544,9 +543,16 @@ function PostAdContent() {
 
                     {/* Contact Phone */}
                     <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-                        <label className="block text-sm font-bold text-gray-900 mb-1">
-                            Холбоо барих утас
-                        </label>
+                        <div className="flex items-center justify-between mb-1">
+                            <label className="block text-sm font-bold text-gray-900">
+                                📞 Холбоо барих утас
+                            </label>
+                            {phoneFromAuth && (
+                                <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                                    ✓ Бүртгэлээс
+                                </span>
+                            )}
+                        </div>
                         <input
                             type="tel"
                             value={contactPhone}
@@ -555,6 +561,9 @@ function PostAdContent() {
                             placeholder="88112233"
                             required
                         />
+                        <p className="text-xs text-gray-500 mt-2">
+                            Худалдан авагчид энэ дугаараар холбогдоно. Өөр дугаар ашиглах бол засаж болно.
+                        </p>
                     </div>
 
                     {/* Location */}

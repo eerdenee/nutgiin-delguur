@@ -144,8 +144,8 @@ export default function ProfilePage() {
             localStorage.removeItem("userRole");
             localStorage.removeItem("userSubscription");
 
-            // Redirect to home
-            window.location.href = "/";
+            // Redirect to login
+            window.location.href = "/login";
         } catch (error) {
             console.error("Logout error:", error);
         }

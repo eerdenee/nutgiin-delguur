@@ -27,8 +27,24 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     const [copied, setCopied] = useState(false);
     const [copiedType, setCopiedType] = useState<'account' | 'iban' | null>(null);
     const [showPaymentWarning, setShowPaymentWarning] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [showLoginModal, setShowLoginModal] = useState(false);
 
     const router = useRouter();
+
+    // Check if user is logged in
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                const { supabase } = await import("@/lib/supabase");
+                const { data: { user } } = await supabase.auth.getUser();
+                setIsLoggedIn(!!user);
+            } catch (err) {
+                setIsLoggedIn(false);
+            }
+        };
+        checkAuth();
+    }, []);
 
     // Increment Views on Mount
     useEffect(() => {
@@ -134,6 +150,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     };
 
     const handleChatClick = () => {
+        // Check if logged in
+        if (!isLoggedIn) {
+            setShowLoginModal(true);
+            return;
+        }
+
         // Update chat clicks
         try {
             const myAds = JSON.parse(localStorage.getItem('my_ads') || '[]');
@@ -149,6 +171,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     };
 
     const handleCallClick = () => {
+        // Check if logged in
+        if (!isLoggedIn) {
+            setShowLoginModal(true);
+            return;
+        }
+
         // Update call clicks
         try {
             const myAds = JSON.parse(localStorage.getItem('my_ads') || '[]');
@@ -273,6 +301,44 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                         >
                             Ойлголоо
                         </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Login Required Modal */}
+            {showLoginModal && (
+                <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4" onClick={() => setShowLoginModal(false)}>
+                    <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+                        <div className="text-center mb-6">
+                            <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Phone className="w-8 h-8 text-yellow-600" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Нэвтрэх шаардлагатай</h3>
+                            <p className="text-gray-600 text-sm">
+                                Борлуулагчтай холбогдохын тулд эхлээд нэвтэрнэ үү.
+                            </p>
+                        </div>
+
+                        <div className="space-y-3">
+                            <Link
+                                href="/login"
+                                className="block w-full bg-primary text-secondary font-bold py-3 rounded-xl hover:bg-yellow-400 transition-colors text-center"
+                            >
+                                Нэвтрэх
+                            </Link>
+                            <Link
+                                href="/register"
+                                className="block w-full bg-gray-100 text-gray-900 font-bold py-3 rounded-xl hover:bg-gray-200 transition-colors text-center"
+                            >
+                                Бүртгүүлэх
+                            </Link>
+                            <button
+                                onClick={() => setShowLoginModal(false)}
+                                className="w-full text-gray-500 font-medium py-2"
+                            >
+                                Хаах
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
