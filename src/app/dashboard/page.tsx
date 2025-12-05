@@ -212,17 +212,17 @@ export default function ProfilePage() {
                         {/* Avatar */}
                         <div className="relative mb-4">
                             <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
-                                {user.image ? (
+                                {user.image && user.image.startsWith('http') ? (
                                     <Image
                                         src={user.image}
                                         alt={user.name}
                                         width={96}
                                         height={96}
-                                        className="object-cover"
+                                        className="object-cover w-full h-full"
                                     />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-600 text-3xl font-bold">
-                                        {user.name[0]}
+                                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-3xl font-bold">
+                                        {user.name[0]?.toUpperCase() || 'U'}
                                     </div>
                                 )}
                             </div>
@@ -238,8 +238,8 @@ export default function ProfilePage() {
                                 <span className="text-xs font-bold">✅ Баталгаажсан үйлдвэрлэгч</span>
                             </div>
                         ) : (
-                            <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-100 text-gray-700 shadow-sm">
-                                <span className="text-xs font-bold">👤 Энгийн хэрэглэгч</span>
+                            <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/30 backdrop-blur-sm text-gray-900 border border-white/40 shadow-sm">
+                                <span className="text-xs font-bold">👤 Хэрэглэгч</span>
                             </div>
                         )}
                     </div>
@@ -299,33 +299,6 @@ export default function ProfilePage() {
                         </Link>
                     </div>
                 )}
-
-                <div className="mb-4">
-                    <button
-                        onClick={async () => {
-                            if (!confirm("Та хуучин өгөгдлөө шинэ систем рүү шилжүүлэх үү?")) return;
-                            try {
-                                const { migrateData } = await import("@/lib/migration");
-                                const result = await migrateData();
-                                if (result.success) {
-                                    alert(`Амжилттай! Нийт ${result.migratedAds} зар шилжлээ.`);
-                                    window.location.reload();
-                                } else {
-                                    alert("Алдаа гарлаа. Та нэвтэрсэн эсэхээ шалгана уу.");
-                                }
-                            } catch (e) {
-                                console.error(e);
-                                alert("Алдаа гарлаа.");
-                            }
-                        }}
-                        className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl shadow-sm hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-                    >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                        </svg>
-                        Хуучин өгөгдөл шилжүүлэх
-                    </button>
-                </div>
 
                 <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
                     {menuItems.map((item, index) => (
