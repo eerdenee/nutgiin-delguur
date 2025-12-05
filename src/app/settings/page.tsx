@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, Camera, Save, Banknote, Mail, CheckCircle } from "lucide-react";
+import { ArrowLeft, Camera, Save, Banknote, Mail, CheckCircle, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // Mongolian banks list
 const BANKS = [
@@ -20,12 +21,18 @@ const BANKS = [
 ];
 
 export default function SettingsPage() {
+    const router = useRouter();
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [currentRole, setCurrentRole] = useState("buyer");
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    // Profile Data
     const [name, setName] = useState("");
     const [phone, setPhone] = useState("");
     const [email, setEmail] = useState("");
     const [avatar, setAvatar] = useState("");
-    const [showSuccess, setShowSuccess] = useState(false);
-    const [currentRole, setCurrentRole] = useState("buyer");
     const [companyName, setCompanyName] = useState("");
     const [companyLogo, setCompanyLogo] = useState("");
 
@@ -33,89 +40,141 @@ export default function SettingsPage() {
     const [bankName, setBankName] = useState("");
     const [bankAccount, setBankAccount] = useState("");
     const [bankAccountName, setBankAccountName] = useState("");
-    const [bankIBAN, setBankIBAN] = useState(""); // IBAN (optional)
+    const [bankIBAN, setBankIBAN] = useState("");
 
     // Load initial data
     useEffect(() => {
-        const savedProfile = localStorage.getItem("userProfile");
-        if (savedProfile) {
+        const loadProfile = async () => {
             try {
-                const parsed = JSON.parse(savedProfile);
-                setName(parsed.name || "Бат-Эрдэнэ");
-                setPhone(parsed.phone || "99112233");
-                setEmail(parsed.email || "");
-                setAvatar(parsed.avatar || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=800&auto=format&fit=crop&q=60");
-                setCompanyName(parsed.companyName || "");
-                setCompanyLogo(parsed.companyLogo || "");
-                setBankName(parsed.bankName || "");
-                setBankAccount(parsed.bankAccount || "");
-                setBankAccountName(parsed.bankAccountName || "");
-                setBankIBAN(parsed.bankIBAN || "");
-            } catch (e) {
-                console.error("Failed to parse profile", e);
-            }
-        } else {
-            // Defaults
-            setName("Бат-Эрдэнэ");
-            setPhone("99112233");
-            setAvatar("https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=800&auto=format&fit=crop&q=60");
-        }
+                const { supabase } = await import("@/lib/supabase");
+                const { data: { user } } = await supabase.auth.getUser();
 
-        // Load current role
-        setCurrentRole(localStorage.getItem("userRole") || "buyer");
-    }, []);
-
-    const compressImage = (base64: string): Promise<string> => {
-        return new Promise((resolve) => {
-            const img = new window.Image();
-            img.src = base64;
-            img.onload = () => {
-                const canvas = document.createElement("canvas");
-                const ctx = canvas.getContext("2d");
-                const maxWidth = 500; // Resize to max 500px width
-                const scale = maxWidth / img.width;
-
-                if (scale >= 1) {
-                    resolve(base64); // No need to resize
+                if (!user) {
+                    setIsLoggedIn(false);
+                    setIsLoading(false);
                     return;
                 }
 
-                canvas.width = maxWidth;
-                canvas.height = img.height * scale;
+                setIsLoggedIn(true);
+                setPhone(user.phone || "");
+                setEmail(user.email || "");
 
-                ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-                resolve(canvas.toDataURL("image/jpeg", 0.7)); // Compress to JPEG with 0.7 quality
-            };
+                // Get profile
+                const { data: profile } = await (supabase
+                    .from('profiles') as any)
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+
+                if (profile) {
+                    setName(profile.name || "");
+                    setAvatar(profile.avatar_url || "");
+                    setCurrentRole(profile.role || "buyer");
+                    setCompanyName(profile.company_name || "");
+                    setCompanyLogo(profile.company_logo || "");
+                    setBankName(profile.bank_name || "");
+                    setBankAccount(profile.bank_account || "");
+                    setBankAccountName(profile.bank_account_name || "");
+                    setBankIBAN(profile.bank_iban || "");
+                }
+            } catch (err) {
+                console.error("Error loading profile:", err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadProfile();
+    }, []);
+
+    const uploadAvatar = async (file: File): Promise<string> => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('folder', 'avatars');
+
+        const { supabase } = await import("@/lib/supabase");
+        const { data: { session } } = await supabase.auth.getSession();
+
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${session?.access_token}`,
+            },
+            body: formData,
         });
+
+        if (!response.ok) {
+            throw new Error('Image upload failed');
+        }
+
+        const data = await response.json();
+        return data.url;
     };
 
-    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            // Check file size (max 5MB)
             if (file.size > 5 * 1024 * 1024) {
                 alert("Зурагны хэмжээ хэт том байна. 5MB-аас бага хэмжээтэй зураг сонгоно уу.");
                 return;
             }
 
-            const reader = new FileReader();
-            reader.onloadend = async () => {
-                const base64 = reader.result as string;
-                try {
-                    const compressed = await compressImage(base64);
-                    setAvatar(compressed);
-                } catch (err) {
-                    console.error("Compression failed", err);
-                    setAvatar(base64); // Fallback to original
+            try {
+                setIsSaving(true);
+                const url = await uploadAvatar(file);
+                setAvatar(url);
+
+                // Update profile immediately
+                const { supabase } = await import("@/lib/supabase");
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    await (supabase.from('profiles') as any)
+                        .update({ avatar_url: url })
+                        .eq('id', user.id);
                 }
-            };
-            reader.readAsDataURL(file);
+            } catch (err) {
+                console.error("Upload failed", err);
+                alert("Зураг хуулахад алдаа гарлаа");
+            } finally {
+                setIsSaving(false);
+            }
         }
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
+        if (!name.trim()) {
+            alert("Нэрээ оруулна уу");
+            return;
+        }
+
+        setIsSaving(true);
         try {
-            const profileData = {
+            const { supabase } = await import("@/lib/supabase");
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (!user) return;
+
+            const updates = {
+                name,
+                email, // Can update email if needed, but usually requires verification
+                company_name: companyName,
+                company_logo: companyLogo,
+                bank_name: bankName,
+                bank_account: bankAccount,
+                bank_account_name: bankAccountName,
+                bank_iban: bankIBAN,
+                updated_at: new Date().toISOString(),
+            };
+
+            const { error } = await (supabase
+                .from('profiles') as any)
+                .update(updates)
+                .eq('id', user.id);
+
+            if (error) throw error;
+
+            // Update localStorage for backward compatibility
+            localStorage.setItem("userProfile", JSON.stringify({
                 name,
                 phone,
                 email,
@@ -126,21 +185,36 @@ export default function SettingsPage() {
                 bankAccount,
                 bankAccountName,
                 bankIBAN
-            };
-            localStorage.setItem("userProfile", JSON.stringify(profileData));
-
-            // Dispatch event for other components
-            window.dispatchEvent(new Event("profileUpdated"));
+            }));
 
             setShowSuccess(true);
             setTimeout(() => setShowSuccess(false), 3000);
         } catch (error) {
             console.error("Save failed:", error);
-            alert("Хадгалахад алдаа гарлаа. Зурагны хэмжээ хэт том байж магадгүй.");
+            alert("Хадгалахад алдаа гарлаа.");
+        } finally {
+            setIsSaving(false);
         }
     };
 
-    const isValid = name.trim() && phone.trim();
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+        );
+    }
+
+    if (!isLoggedIn) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+                <p className="text-gray-600 mb-4">Нэвтрэх шаардлагатай</p>
+                <Link href="/login" className="px-6 py-2.5 bg-primary text-secondary font-bold rounded-xl">
+                    Нэвтрэх
+                </Link>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 pb-24">
@@ -177,13 +251,18 @@ export default function SettingsPage() {
                                 htmlFor="avatar-upload"
                                 className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-yellow-400 transition-colors shadow-lg"
                             >
-                                <Camera className="w-4 h-4 text-secondary" />
+                                {isSaving ? (
+                                    <Loader2 className="w-4 h-4 animate-spin text-secondary" />
+                                ) : (
+                                    <Camera className="w-4 h-4 text-secondary" />
+                                )}
                             </label>
                             <input
                                 id="avatar-upload"
                                 type="file"
                                 accept="image/*"
                                 onChange={handleAvatarChange}
+                                disabled={isSaving}
                                 className="hidden"
                             />
                         </div>
@@ -214,10 +293,10 @@ export default function SettingsPage() {
                             <input
                                 type="tel"
                                 value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                placeholder="Утасны дугаар"
-                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                                disabled
+                                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed"
                             />
+                            <p className="text-xs text-gray-400 mt-1">Утасны дугаарыг өөрчлөх боломжгүй</p>
                         </div>
 
                         {/* Email */}
@@ -233,9 +312,6 @@ export default function SettingsPage() {
                                 placeholder="example@gmail.com"
                                 className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
                             />
-                            <p className="text-xs text-gray-500 mt-1">
-                                Нууц үг сэргээх, мэдэгдэл хүлээн авахад хэрэглэгдэнэ
-                            </p>
                         </div>
 
                         {/* Company Branding - Only for Producers */}
@@ -259,9 +335,6 @@ export default function SettingsPage() {
                                             placeholder="Жишээ: Victory Cars"
                                             className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
                                         />
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            Бүтээгдэхүүний картан дээр таны нэрийн оронд компанийн нэр харагдана
-                                        </p>
                                     </div>
 
                                     {/* Company Logo URL */}
@@ -276,9 +349,6 @@ export default function SettingsPage() {
                                             placeholder="https://example.com/logo.png"
                                             className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
                                         />
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            Лого нь бүтээгдэхүүний зурагны баруун дээд буланд харагдана (100x50px тохиромжтой)
-                                        </p>
                                         {companyLogo && (
                                             <div className="mt-2 p-2 bg-gray-50 rounded-lg">
                                                 <p className="text-xs text-gray-600 mb-1">Урьдчилан харах:</p>
@@ -302,22 +372,22 @@ export default function SettingsPage() {
                     {/* Save Button */}
                     <button
                         onClick={handleSave}
-                        disabled={!isValid}
+                        disabled={isSaving}
                         className="w-full mt-8 px-6 py-4 bg-primary text-secondary font-bold rounded-xl hover:bg-yellow-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                        <Save className="w-5 h-5" />
+                        {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
                         Хадгалах
                     </button>
                 </div>
 
-                {/* Bank Account Section - NEW */}
+                {/* Bank Account Section */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
                     <h2 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
                         <Banknote className="w-5 h-5 text-green-600" />
                         Төлбөр хүлээн авах данс
                     </h2>
                     <p className="text-sm text-gray-500 mb-4">
-                        Нэг удаа оруулаад, зар бүрт дахин бичих шаардлагагүй болно. Худалдан авагч дансыг хуулж авах боломжтой.
+                        Нэг удаа оруулаад, зар бүрт дахин бичих шаардлагагүй болно.
                     </p>
 
                     <div className="space-y-4">
@@ -366,9 +436,6 @@ export default function SettingsPage() {
                                 placeholder="BAT-ERDENE"
                                 className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors uppercase"
                             />
-                            <p className="text-xs text-gray-500 mt-1">
-                                Латин үсгээр бичнэ үү (банканд бүртгэлтэй нэр)
-                            </p>
                         </div>
 
                         {/* IBAN - Optional */}
@@ -384,43 +451,16 @@ export default function SettingsPage() {
                                 placeholder="MN12 1234 5678 9012 3456 78"
                                 className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors font-mono uppercase"
                             />
-                            <p className="text-xs text-gray-500 mt-1">
-                                Олон улсын шилжүүлэг хүлээн авах бол IBAN оруулна уу
-                            </p>
                         </div>
                     </div>
-
-                    {/* Preview */}
-                    {bankName && bankAccount && (
-                        <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-xl">
-                            <div className="flex items-start gap-3">
-                                <CheckCircle className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
-                                <div>
-                                    <p className="text-sm font-medium text-green-800">Данс бэлэн боллоо!</p>
-                                    <p className="text-sm text-green-700 mt-1 font-mono">
-                                        <strong>{bankName}</strong>: {bankAccount}
-                                    </p>
-                                    {bankAccountName && (
-                                        <p className="text-xs text-green-600 mt-1">
-                                            Эзэмшигч: {bankAccountName}
-                                        </p>
-                                    )}
-                                    {bankIBAN && (
-                                        <p className="text-xs text-blue-600 mt-1 font-mono">
-                                            🌍 IBAN: {bankIBAN}
-                                        </p>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    )}
 
                     {/* Save Bank Button */}
                     <button
                         onClick={handleSave}
-                        className="w-full mt-4 px-6 py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                        disabled={isSaving}
+                        className="w-full mt-4 px-6 py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                     >
-                        <Save className="w-5 h-5" />
+                        {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
                         Дансны мэдээлэл хадгалах
                     </button>
                 </div>
@@ -430,11 +470,7 @@ export default function SettingsPage() {
                     <h2 className="text-lg font-bold text-gray-900 mb-4">Баталгаажуулалт</h2>
                     {currentRole === 'producer' ? (
                         <div className="flex items-center gap-3 p-4 bg-green-50 rounded-xl border border-green-200">
-                            <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                            </div>
+                            <CheckCircle className="w-6 h-6 text-green-600" />
                             <div>
                                 <p className="font-bold text-green-900">Таны хаяг баталгаажсан байна</p>
                                 <p className="text-sm text-green-700">Та баталгаажсан үйлдвэрлэгч статустай байна</p>
@@ -454,40 +490,13 @@ export default function SettingsPage() {
                         </div>
                     )}
                 </div>
-
-                {/* Developer Zone */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
-                    <h2 className="text-lg font-bold text-gray-900 mb-4">🔧 Developer Zone</h2>
-                    <p className="text-sm text-gray-600 mb-4">
-                        Тестийн зорилгоор хэрэглэгчийн төрлийг солих
-                    </p>
-                    <button
-                        onClick={() => {
-                            const currentRole = localStorage.getItem("userRole") || "buyer";
-                            let newRole = "buyer";
-                            if (currentRole === "buyer") newRole = "producer";
-                            else if (currentRole === "producer") newRole = "admin";
-                            else newRole = "buyer";
-
-                            localStorage.setItem("userRole", newRole);
-                            setCurrentRole(newRole);
-                            window.dispatchEvent(new Event("roleUpdated"));
-                            window.location.reload();
-                        }}
-                        className="w-full px-6 py-4 bg-gray-800 text-white font-bold rounded-xl hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
-                    >
-                        🔄 Switch Role (Buyer {"->"} Producer {"->"} Admin)
-                    </button>
-                    <p className="text-xs text-gray-500 mt-2 text-center">
-                        Одоогийн төрөл: <strong>{currentRole}</strong>
-                    </p>
-                </div>
             </div>
 
             {/* Success Toast */}
             {showSuccess && (
-                <div className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg z-50 animate-bounce">
-                    ✓ Амжилттай хадгалагдлаа
+                <div className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg z-50 animate-bounce flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5" />
+                    Амжилттай хадгалагдлаа
                 </div>
             )}
         </div>

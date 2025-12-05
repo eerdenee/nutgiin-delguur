@@ -1,236 +1,323 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, use } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, Send, ShoppingBag } from "lucide-react";
-import { useParams } from "next/navigation";
-import { MOCK_PRODUCTS } from "@/lib/data";
-import { formatPrice } from "@/lib/utils";
+import { ArrowLeft, Send, Loader2 } from "lucide-react";
+import { Skeleton } from "@/components/Skeleton";
 
-// Mock messages data
-const MOCK_MESSAGES = {
-    "1": [
-        { id: "m1", text: "Сайн байна уу? Архангайн ааруулын талаар асуумаар байна.", sender: "them" as const, timestamp: "14:30" },
-        { id: "m2", text: "Сайн байна уу! Тийм ээ, юу асуух вэ?", sender: "me" as const, timestamp: "14:32" },
-        { id: "m3", text: "Үнийг бага зэрэг хөнгөлж болох уу?", sender: "them" as const, timestamp: "14:35" },
-        { id: "m4", text: "10 кг-аас дээш авбал 5% хөнгөлнө.", sender: "me" as const, timestamp: "14:37" },
-    ],
-    "2": [
-        { id: "m5", text: "Адууны махыг хэзээ авч болох вэ?", sender: "them" as const, timestamp: "10:15" },
-        { id: "m6", text: "Маргааш өглөө авч болно.", sender: "me" as const, timestamp: "10:20" },
-        { id: "m7", text: "Баярлалаа, маргааш авна.", sender: "them" as const, timestamp: "10:22" },
-    ],
-    "3": [
-        { id: "m8", text: "Сайн байна уу? Эсгий таавчигийн талаар асуумаар байна.", sender: "them" as const, timestamp: "16:20" },
-        { id: "m9", text: "Сайн байна уу! Тийм ээ, юу асуух вэ?", sender: "me" as const, timestamp: "16:25" },
-    ],
-    "4": [
-        { id: "m10", text: "Адууны махыг хэзээ авч болох вэ?", sender: "them" as const, timestamp: "10:15" },
-        { id: "m11", text: "Маргааш өглөө авч болно.", sender: "me" as const, timestamp: "10:20" },
-    ],
-};
+interface Message {
+    id: string;
+    sender_id: string;
+    receiver_id: string;
+    product_id: string | null;
+    content: string;
+    is_read: boolean;
+    created_at: string;
+    sender?: {
+        id: string;
+        name: string;
+        avatar_url: string;
+    };
+}
 
-const MOCK_USERS = {
-    "1": { name: "Бат-Эрдэнэ", avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=800&auto=format&fit=crop&q=60" },
-    "2": { name: "Дорж", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=60" },
-    "3": { name: "Болд", avatar: "" },
-    "4": { name: "Дорж", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=60" },
-};
+interface Participant {
+    id: string;
+    name: string;
+    avatar_url: string;
+}
 
-export default function ChatRoomPage() {
-    const params = useParams();
-    const chatId = params.id as string;
-    const [message, setMessage] = useState("");
-    const [messages, setMessages] = useState<any[]>([]);
-    const [user, setUser] = useState<any>({ name: "Хэрэглэгч", avatar: "" });
-    const [productInfo, setProductInfo] = useState<any>(null);
+interface Product {
+    id: string;
+    title: string;
+    price: number;
+    images: string[];
+}
 
-    // Load messages, user info, and product info
+export default function ChatPage({ params }: { params: Promise<{ id: string }> }) {
+    const resolvedParams = use(params);
+    const participantId = resolvedParams.id;
+
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [participant, setParticipant] = useState<Participant | null>(null);
+    const [product, setProduct] = useState<Product | null>(null);
+    const [newMessage, setNewMessage] = useState("");
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSending, setIsSending] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    // Get product ID from URL
+    const [productId, setProductId] = useState<string | null>(null);
+
     useEffect(() => {
-        // 1. Load messages
-        const savedMessages = localStorage.getItem(`chat_messages_${chatId}`);
-        if (savedMessages) {
-            setMessages(JSON.parse(savedMessages));
-        } else {
-            // Seed with mock if empty
-            const mock = MOCK_MESSAGES[chatId as keyof typeof MOCK_MESSAGES] || [];
-            setMessages(mock);
-            if (mock.length > 0) {
-                localStorage.setItem(`chat_messages_${chatId}`, JSON.stringify(mock));
-            }
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            setProductId(params.get('product'));
         }
+    }, []);
 
-        // 2. Load conversation details
-        const conversations = JSON.parse(localStorage.getItem("chat_conversations") || "[]");
-        const conversation = conversations.find((c: any) => c.id === chatId);
+    // Load messages and participant info
+    useEffect(() => {
+        const loadChat = async () => {
+            try {
+                const { supabase } = await import("@/lib/supabase");
+                const { data: { user } } = await supabase.auth.getUser();
 
-        if (conversation) {
-            setUser({
-                name: conversation.userName,
-                avatar: conversation.userAvatar
-            });
-
-            // 3. Load Product Info
-            if (conversation.productId) {
-                // Try MOCK_PRODUCTS first
-                let product = MOCK_PRODUCTS.find(p => p.id === conversation.productId);
-
-                // If not found, try localStorage (my_ads)
-                if (!product) {
-                    const myAds = JSON.parse(localStorage.getItem('my_ads') || '[]');
-                    product = myAds.find((p: any) => p.id === conversation.productId);
+                if (!user) {
+                    setIsLoggedIn(false);
+                    setIsLoading(false);
+                    return;
                 }
 
-                if (product) {
-                    setProductInfo(product);
+                setIsLoggedIn(true);
+                setCurrentUserId(user.id);
+
+                // Get participant info
+                const { data: participantData } = await (supabase
+                    .from('profiles') as any)
+                    .select('id, name, avatar_url')
+                    .eq('id', participantId)
+                    .single();
+
+                if (participantData) {
+                    setParticipant({
+                        id: participantData.id,
+                        name: participantData.name || 'Хэрэглэгч',
+                        avatar_url: participantData.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${participantId}`,
+                    });
                 }
-            }
 
-            // 4. Mark as read
-            if (conversation.unread) {
-                const updatedConversations = conversations.map((c: any) =>
-                    c.id === chatId ? { ...c, unread: false } : c
-                );
-                localStorage.setItem("chat_conversations", JSON.stringify(updatedConversations));
-                window.dispatchEvent(new Event("chatUpdated"));
-            }
-        } else {
-            // Fallback to mock user
-            const mockUser = MOCK_USERS[chatId as keyof typeof MOCK_USERS];
-            if (mockUser) setUser(mockUser);
-        }
-    }, [chatId]);
+                // Get product info if productId exists
+                if (productId) {
+                    const { data: productData } = await (supabase
+                        .from('products') as any)
+                        .select('id, title, price, images')
+                        .eq('id', productId)
+                        .single();
 
-    const handleSend = () => {
-        if (message.trim()) {
-            const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-
-            const newMessage = {
-                id: crypto.randomUUID(),
-                text: message.trim(),
-                sender: "me" as const,
-                timestamp: timestamp
-            };
-
-            const updatedMessages = [...messages, newMessage];
-            setMessages(updatedMessages);
-            setMessage("");
-
-            // Save messages
-            localStorage.setItem(`chat_messages_${chatId}`, JSON.stringify(updatedMessages));
-
-            // Update conversation last message
-            const conversations = JSON.parse(localStorage.getItem("chat_conversations") || "[]");
-            let updatedConversations = conversations.map((c: any) => {
-                if (c.id === chatId) {
-                    return {
-                        ...c,
-                        lastMessage: newMessage.text,
-                        timestamp: timestamp,
-                        lastMessageTime: new Date().toISOString(),
-                        unread: false
-                    };
+                    if (productData) {
+                        setProduct(productData);
+                    }
                 }
-                return c;
-            });
 
-            // If conversation doesn't exist, add it
-            if (!conversations.find((c: any) => c.id === chatId)) {
-                updatedConversations.push({
-                    id: chatId,
-                    userName: user.name,
-                    userAvatar: user.avatar,
-                    lastMessage: newMessage.text,
-                    timestamp: timestamp,
-                    lastMessageTime: new Date().toISOString(),
-                    unread: false
+                // Get messages
+                const { getMessages } = await import("@/lib/messages");
+                const { data: messagesData } = await getMessages(participantId, productId || undefined);
+                setMessages(messagesData || []);
+
+                // Subscribe to new messages
+                const { subscribeToMessages } = await import("@/lib/messages");
+                const unsubscribe = subscribeToMessages(user.id, (newMsg) => {
+                    if (newMsg.sender_id === participantId) {
+                        setMessages(prev => [...prev, newMsg]);
+                    }
                 });
+
+                return () => unsubscribe();
+            } catch (err) {
+                if (process.env.NODE_ENV === 'development') {
+                    console.error('Error loading chat:', err);
+                }
+            } finally {
+                setIsLoading(false);
             }
+        };
 
-            // Sort by time
-            updatedConversations.sort((a: any, b: any) =>
-                new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
-            );
+        if (participantId) {
+            loadChat();
+        }
+    }, [participantId, productId]);
 
-            localStorage.setItem("chat_conversations", JSON.stringify(updatedConversations));
-            window.dispatchEvent(new Event("chatUpdated"));
+    // Scroll to bottom when messages change
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
+
+    const handleSend = async () => {
+        if (!newMessage.trim() || isSending) return;
+
+        setIsSending(true);
+        try {
+            const { sendMessage } = await import("@/lib/messages");
+            const { data, error } = await sendMessage(participantId, newMessage.trim(), productId || undefined);
+
+            if (!error && data) {
+                setMessages(prev => [...prev, data]);
+                setNewMessage("");
+                inputRef.current?.focus();
+            } else {
+                alert(error || 'Илгээхэд алдаа гарлаа');
+            }
+        } catch (err) {
+            alert('Илгээхэд алдаа гарлаа');
+        } finally {
+            setIsSending(false);
         }
     };
+
+    const handleKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+        }
+    };
+
+    const formatTime = (dateString: string) => {
+        return new Date(dateString).toLocaleTimeString('mn-MN', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex flex-col">
+                <div className="bg-white px-4 py-3 border-b flex items-center gap-3 sticky top-0 z-10">
+                    <Link href="/messages" className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors">
+                        <ArrowLeft className="w-6 h-6 text-gray-900" />
+                    </Link>
+                    <Skeleton className="w-10 h-10 rounded-full" />
+                    <Skeleton className="w-32 h-5 rounded" />
+                </div>
+                <div className="flex-1 p-4 space-y-4">
+                    {[1, 2, 3].map(i => (
+                        <div key={i} className={`flex ${i % 2 === 0 ? 'justify-end' : ''}`}>
+                            <Skeleton className={`w-48 h-12 rounded-2xl`} />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    if (!isLoggedIn) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+                <p className="text-gray-600 mb-4">Нэвтрэх шаардлагатай</p>
+                <Link href="/login" className="px-6 py-2.5 bg-primary text-secondary font-bold rounded-xl">
+                    Нэвтрэх
+                </Link>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
             {/* Header */}
-            <div className="bg-white border-b sticky top-0 z-10">
-                <div className="px-4 py-3 flex items-center gap-3">
-                    <Link href="/messages" className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors">
-                        <ArrowLeft className="w-6 h-6 text-gray-900" />
-                    </Link>
-                    <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden relative">
-                        {user.avatar ? (
-                            <Image src={user.avatar} alt={user.name} fill className="object-cover" />
-                        ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-500 font-bold">
-                                {user.name[0]}
-                            </div>
-                        )}
-                    </div>
-                    <h1 className="font-bold text-lg">{user.name}</h1>
+            <div className="bg-white px-4 py-3 border-b flex items-center gap-3 sticky top-0 z-10">
+                <Link href="/messages" className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors">
+                    <ArrowLeft className="w-6 h-6 text-gray-900" />
+                </Link>
+                <div className="relative w-10 h-10 rounded-full overflow-hidden">
+                    <Image
+                        src={participant?.avatar_url || ''}
+                        alt={participant?.name || ''}
+                        fill
+                        className="object-cover"
+                    />
                 </div>
-
-                {/* Product Snippet (New Feature) */}
-                {productInfo && (
-                    <Link href={`/product/${productInfo.id}`} className="block bg-gray-50 px-4 py-2 border-t hover:bg-gray-100 transition-colors">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-white rounded-lg border border-gray-200 overflow-hidden relative flex-shrink-0">
-                                <Image src={productInfo.image} alt={productInfo.title} fill className="object-cover" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <h3 className="text-sm font-bold text-gray-900 truncate">{productInfo.title}</h3>
-                                <p className="text-xs text-primary font-bold">
-                                    {formatPrice(productInfo.price, productInfo.currency)}
-                                </p>
-                            </div>
-                            <ShoppingBag className="w-4 h-4 text-gray-400" />
-                        </div>
-                    </Link>
-                )}
+                <div className="flex-1 min-w-0">
+                    <h1 className="font-bold text-gray-900 truncate">{participant?.name || 'Хэрэглэгч'}</h1>
+                    {product && (
+                        <p className="text-xs text-primary truncate font-medium">{product.title}</p>
+                    )}
+                </div>
             </div>
 
-            {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 pb-32 md:pb-24">
-                {messages.map((msg) => (
-                    <div key={msg.id} className={`flex ${msg.sender === "me" ? "justify-end" : "justify-start"}`}>
-                        <div className={`max-w-[75%] rounded-2xl px-4 py-2 ${msg.sender === "me"
-                            ? "bg-primary text-secondary rounded-br-sm"
-                            : "bg-white text-gray-900 rounded-bl-sm shadow-sm"
-                            }`}>
-                            <p className="text-sm">{msg.text}</p>
-                            <span className={`text-[10px] mt-1 block ${msg.sender === "me" ? "text-gray-700" : "text-gray-500"}`}>
-                                {msg.timestamp}
-                            </span>
-                        </div>
+            {/* Product Preview */}
+            {product && (
+                <Link
+                    href={`/product/${product.id}`}
+                    className="bg-white border-b px-4 py-3 flex items-center gap-3 hover:bg-gray-50"
+                >
+                    <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                        <Image
+                            src={product.images?.[0] || ''}
+                            alt={product.title}
+                            fill
+                            className="object-cover"
+                        />
                     </div>
-                ))}
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{product.title}</p>
+                        <p className="text-sm font-bold text-primary">₮{product.price.toLocaleString()}</p>
+                    </div>
+                </Link>
+            )}
+
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 pb-24">
+                {messages.length === 0 ? (
+                    <div className="text-center text-gray-500 py-10">
+                        <p>Мессеж эхлүүлэхийн тулд бичнэ үү</p>
+                    </div>
+                ) : (
+                    messages.map((msg, index) => {
+                        const isOwn = msg.sender_id === currentUserId;
+                        const showAvatar = !isOwn && (index === 0 || messages[index - 1]?.sender_id !== msg.sender_id);
+
+                        return (
+                            <div
+                                key={msg.id}
+                                className={`flex items-end gap-2 ${isOwn ? 'justify-end' : ''}`}
+                            >
+                                {!isOwn && showAvatar && (
+                                    <div className="relative w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                                        <Image
+                                            src={msg.sender?.avatar_url || participant?.avatar_url || ''}
+                                            alt=""
+                                            fill
+                                            className="object-cover"
+                                        />
+                                    </div>
+                                )}
+                                {!isOwn && !showAvatar && <div className="w-8" />}
+
+                                <div
+                                    className={`max-w-[75%] px-4 py-2 rounded-2xl ${isOwn
+                                        ? 'bg-primary text-secondary rounded-br-md'
+                                        : 'bg-white text-gray-900 rounded-bl-md border border-gray-100'
+                                        }`}
+                                >
+                                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                                    <p className={`text-xs mt-1 ${isOwn ? 'text-yellow-900/60' : 'text-gray-400'}`}>
+                                        {formatTime(msg.created_at)}
+                                    </p>
+                                </div>
+                            </div>
+                        );
+                    })
+                )}
+                <div ref={messagesEndRef} />
             </div>
 
-            {/* Input Area */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 pb-20 md:pb-4 z-20">
-                <div className="flex items-center gap-2 max-w-4xl mx-auto">
+            {/* Input */}
+            <div className="fixed bottom-16 left-0 right-0 bg-white border-t p-3">
+                <div className="flex items-center gap-2 max-w-screen-lg mx-auto">
                     <input
+                        ref={inputRef}
                         type="text"
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        onKeyPress={(e) => e.key === "Enter" && handleSend()}
-                        placeholder="Зурвас бичих..."
-                        className="flex-1 px-4 py-3 rounded-full border border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder="Мессеж бичих..."
+                        className="flex-1 px-4 py-3 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                        disabled={isSending}
                     />
                     <button
                         onClick={handleSend}
-                        disabled={!message.trim()}
-                        className="w-12 h-12 bg-primary text-secondary rounded-full flex items-center justify-center hover:bg-yellow-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={!newMessage.trim() || isSending}
+                        className="p-3 bg-primary text-secondary rounded-full hover:bg-yellow-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <Send className="w-5 h-5" />
+                        {isSending ? (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                            <Send className="w-5 h-5" />
+                        )}
                     </button>
                 </div>
             </div>

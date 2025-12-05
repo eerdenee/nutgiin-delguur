@@ -30,6 +30,29 @@ export default function ProducerVerifyPage() {
         }
     };
 
+    const uploadImage = async (file: File): Promise<string> => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('folder', 'verification');
+
+        const { data: { session } } = await supabase.auth.getSession();
+
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${session?.access_token}`,
+            },
+            body: formData,
+        });
+
+        if (!response.ok) {
+            throw new Error('Image upload failed');
+        }
+
+        const data = await response.json();
+        return data.url;
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
@@ -38,23 +61,25 @@ export default function ProducerVerifyPage() {
             // 1. Get current user
             const { data: { user } } = await supabase.auth.getUser();
 
-            // For demo purposes, if no user is logged in, we might fail or mock it.
-            // Assuming user is logged in for this flow.
+            if (!user) {
+                alert("Нэвтрэх шаардлагатай");
+                router.push("/login");
+                return;
+            }
 
-            // 2. Upload images (Mocking upload for now as we might not have storage buckets setup)
-            // In real app:
-            // const { data: frontData } = await supabase.storage.from('verification').upload(`${user.id}/front.jpg`, files.idFront);
-            // ... etc.
+            if (!files.idFront || !files.idBack || !files.selfie) {
+                alert("Бүх зургийг оруулна уу");
+                return;
+            }
 
-            // Mock URLs
-            const idFrontUrl = "https://example.com/mock-front.jpg";
-            const idBackUrl = "https://example.com/mock-back.jpg";
-            const selfieUrl = "https://example.com/mock-selfie.jpg";
+            // 2. Upload images
+            const idFrontUrl = await uploadImage(files.idFront);
+            const idBackUrl = await uploadImage(files.idBack);
+            const selfieUrl = await uploadImage(files.selfie);
 
-            // 3. Insert into verification_requests (table will be created later)
-            // For now, save to localStorage as fallback
+            // 3. Insert into verification_requests
             const verificationData = {
-                user_id: user?.id || 'mock-user-id',
+                user_id: user.id,
                 phone: formData.phone,
                 business_name: formData.businessName,
                 id_front_url: idFrontUrl,
@@ -64,19 +89,11 @@ export default function ProducerVerifyPage() {
                 created_at: new Date().toISOString()
             };
 
-            // Try Supabase first, fallback to localStorage
-            try {
-                const { error } = await supabase
-                    .from('verification_requests' as any)
-                    .insert(verificationData as any);
+            const { error } = await (supabase
+                .from('verification_requests') as any)
+                .insert(verificationData);
 
-                if (error) throw error;
-            } catch {
-                // Fallback: save to localStorage for demo
-                const existing = JSON.parse(localStorage.getItem('verification_requests') || '[]');
-                existing.push(verificationData);
-                localStorage.setItem('verification_requests', JSON.stringify(existing));
-            }
+            if (error) throw error;
 
             setIsSuccess(true);
             setTimeout(() => {

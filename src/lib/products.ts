@@ -247,6 +247,9 @@ export async function getMyProducts(): Promise<{ data: Product[]; error: string 
     }
 }
 
+// Alias for backward compatibility
+export const getUserProducts = getMyProducts;
+
 /**
  * Update product
  */
@@ -400,6 +403,12 @@ export async function trackEngagement(
             row_id: productId
         });
     } catch (err) {
-        console.error('Track engagement error:', err);
+        if (process.env.NODE_ENV === 'development') {
+            console.error('Track engagement error:', err);
+        }
     }
 }
+
+// Alias for backward compatibility
+export const getUserFavorites = getFavorites;
+

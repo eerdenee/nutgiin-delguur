@@ -3,14 +3,17 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, Edit, Trash2, Package, TrendingUp, ShieldCheck, Clock, AlertTriangle } from "lucide-react";
-import { MOCK_PRODUCTS } from "@/lib/data";
+import { ArrowLeft, Edit, Trash2, Package, TrendingUp, ShieldCheck, Clock, AlertTriangle, Loader2 } from "lucide-react";
 import TierUpgradeNotification from "@/components/TierUpgradeNotification";
 import { getTierUpgradeRequirement, TierUpgradeRequirement, VerificationStatus } from "@/lib/verificationSystem";
-import { getDaysUntilExpiration, isAdExpired } from "@/lib/subscription";
+import { getDaysUntilExpiration } from "@/lib/subscription";
+import { ProductGridSkeleton } from "@/components/Skeleton";
 
 export default function MyAdsPage() {
     const [products, setProducts] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [productToDelete, setProductToDelete] = useState<string | null>(null);
 
@@ -22,30 +25,74 @@ export default function MyAdsPage() {
         isVerified: false
     });
 
-    // Load ads from localStorage
+    // Load ads from Supabase
     useEffect(() => {
-        const loadAds = () => {
-            const savedAds = JSON.parse(localStorage.getItem('my_ads') || '[]');
-            setProducts(savedAds);
+        const loadAds = async () => {
+            try {
+                const { supabase } = await import("@/lib/supabase");
+                const { data: { user } } = await supabase.auth.getUser();
 
-            // MOCK: Check for tier upgrades
-            // Simulate that the user has reached "Aimag" tier
-            // In a real app, this would come from backend logic based on engagement score
-            const mockCurrentTier = 'soum';
-            const mockNextTier = 'aimag'; // Upgrade triggered!
-
-            // Check if we already showed this or if user is verified
-            const hasSeenUpgrade = localStorage.getItem('has_seen_aimag_upgrade');
-
-            if (!hasSeenUpgrade) {
-                const requirement = getTierUpgradeRequirement(mockCurrentTier, mockNextTier);
-                if (requirement.message) {
-                    setUpgradeRequirement(requirement);
-                    setShowUpgradeModal(true);
+                if (!user) {
+                    setIsLoggedIn(false);
+                    setIsLoading(false);
+                    return;
                 }
+
+                setIsLoggedIn(true);
+
+                // Get user's products from Supabase
+                const { getUserProducts } = await import("@/lib/products");
+                const { data, error } = await getUserProducts();
+
+                if (!error && data) {
+                    // Transform to component format
+                    const transformedProducts = data.map((p: any) => ({
+                        id: p.id,
+                        title: p.title,
+                        price: p.price,
+                        currency: p.currency || '₮',
+                        location: p.location,
+                        image: p.images?.[0] || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800',
+                        images: p.images || [],
+                        category: p.category,
+                        description: p.description,
+                        tier: p.tier || 'soum',
+                        views: p.views || 0,
+                        saves: p.saves || 0,
+                        callClicks: p.call_clicks || 0,
+                        chatClicks: p.chat_clicks || 0,
+                        createdAt: p.created_at,
+                        subscriptionTier: p.tier || 'free',
+                        status: p.status,
+                    }));
+                    setProducts(transformedProducts);
+                }
+
+                // Check for tier upgrades
+                const hasSeenUpgrade = localStorage.getItem('has_seen_aimag_upgrade');
+                if (!hasSeenUpgrade && data && data.length > 0) {
+                    const mockCurrentTier = 'soum';
+                    const mockNextTier = 'aimag';
+                    const requirement = getTierUpgradeRequirement(mockCurrentTier, mockNextTier);
+                    if (requirement.message) {
+                        setUpgradeRequirement(requirement);
+                        setShowUpgradeModal(true);
+                    }
+                }
+            } catch (err) {
+                if (process.env.NODE_ENV === 'development') {
+                    console.error('Error loading ads:', err);
+                }
+            } finally {
+                setIsLoading(false);
             }
         };
+
         loadAds();
+
+        // Listen for updates
+        window.addEventListener('adsUpdated', loadAds);
+        return () => window.removeEventListener('adsUpdated', loadAds);
     }, []);
 
     const handleDeleteClick = (productId: string) => {
@@ -53,12 +100,24 @@ export default function MyAdsPage() {
         setShowDeleteDialog(true);
     };
 
-    const handleConfirmDelete = () => {
-        if (productToDelete) {
-            const updatedProducts = products.filter(p => p.id !== productToDelete);
-            setProducts(updatedProducts);
-            localStorage.setItem('my_ads', JSON.stringify(updatedProducts));
-            window.dispatchEvent(new Event('adsUpdated'));
+    const handleConfirmDelete = async () => {
+        if (!productToDelete) return;
+
+        setIsDeleting(true);
+        try {
+            const { deleteProduct } = await import("@/lib/products");
+            const { error } = await deleteProduct(productToDelete);
+
+            if (!error) {
+                setProducts(prev => prev.filter(p => p.id !== productToDelete));
+                window.dispatchEvent(new Event('adsUpdated'));
+            } else {
+                alert('Устгахад алдаа гарлаа: ' + error);
+            }
+        } catch (err) {
+            alert('Устгахад алдаа гарлаа');
+        } finally {
+            setIsDeleting(false);
             setShowDeleteDialog(false);
             setProductToDelete(null);
         }
@@ -70,10 +129,9 @@ export default function MyAdsPage() {
     };
 
     const handleUpgradeVerify = () => {
-        // Update verification status
         setVerificationStatus({
             level: 'id_card',
-            isVerified: false // Pending verification
+            isVerified: false
         });
         localStorage.setItem('has_seen_aimag_upgrade', 'true');
     };
@@ -81,6 +139,45 @@ export default function MyAdsPage() {
     const handleUpgradeSkip = () => {
         localStorage.setItem('has_seen_aimag_upgrade', 'true');
     };
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gray-50 pb-24">
+                <div className="bg-white px-4 py-3 border-b flex items-center gap-3 sticky top-0 z-10">
+                    <Link href="/dashboard" className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors">
+                        <ArrowLeft className="w-6 h-6 text-gray-900" />
+                    </Link>
+                    <h1 className="font-bold text-lg">Миний бүтээгдэхүүнүүд</h1>
+                </div>
+                <div className="p-4">
+                    <ProductGridSkeleton count={4} />
+                </div>
+            </div>
+        );
+    }
+
+    if (!isLoggedIn) {
+        return (
+            <div className="min-h-screen bg-gray-50 pb-24">
+                <div className="bg-white px-4 py-3 border-b flex items-center gap-3 sticky top-0 z-10">
+                    <Link href="/dashboard" className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors">
+                        <ArrowLeft className="w-6 h-6 text-gray-900" />
+                    </Link>
+                    <h1 className="font-bold text-lg">Миний бүтээгдэхүүнүүд</h1>
+                </div>
+                <div className="flex flex-col items-center justify-center py-20 text-center px-4">
+                    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                        <Package className="w-10 h-10 text-gray-400" />
+                    </div>
+                    <h3 className="font-bold text-gray-900 mb-1">Нэвтрэх шаардлагатай</h3>
+                    <p className="text-sm text-gray-500 mb-6">Өөрийн бүтээгдэхүүнүүдээ харахын тулд нэвтэрнэ үү.</p>
+                    <Link href="/login" className="px-6 py-2.5 bg-primary text-secondary font-bold rounded-xl hover:bg-yellow-400 transition-colors">
+                        Нэвтрэх
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 pb-24">
@@ -90,6 +187,9 @@ export default function MyAdsPage() {
                     <ArrowLeft className="w-6 h-6 text-gray-900" />
                 </Link>
                 <h1 className="font-bold text-lg">Миний бүтээгдэхүүнүүд</h1>
+                {products.length > 0 && (
+                    <span className="ml-auto text-sm text-gray-500">{products.length} бүтээгдэхүүн</span>
+                )}
             </div>
 
             {/* Growth Status Card */}
@@ -240,14 +340,17 @@ export default function MyAdsPage() {
                         <div className="flex gap-3">
                             <button
                                 onClick={handleCancelDelete}
-                                className="flex-1 px-4 py-3 bg-gray-100 text-gray-900 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+                                disabled={isDeleting}
+                                className="flex-1 px-4 py-3 bg-gray-100 text-gray-900 font-bold rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-50"
                             >
                                 Болих
                             </button>
                             <button
                                 onClick={handleConfirmDelete}
-                                className="flex-1 px-4 py-3 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-600 transition-colors"
+                                disabled={isDeleting}
+                                className="flex-1 px-4 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                             >
+                                {isDeleting && <Loader2 className="w-4 h-4 animate-spin" />}
                                 Устгах
                             </button>
                         </div>
