@@ -1,0 +1,29 @@
+{
+    "common": {
+        "login": "Кирүү",
+        "register": "Катталуу",
+        "logout": "Чыгуу",
+        "save": "Сактоо",
+        "cancel": "Жокко чыгаруу",
+        "loading": "Жүктөлүүдө...",
+        "error": "Ката кетти",
+        "success": "Ийгиликтүү"
+    },
+    "dashboard": {
+        "welcome": "Кош келиңиз",
+        "guest": "Конок",
+        "buyer": "Сатып алуучу",
+        "producer": "Өндүрүүчү",
+        "my_products": "Менин товарларым",
+        "favorites": "Сакталгандар",
+        "settings": "Жөндөөлөр",
+        "become_producer": "Сатуучу болуу",
+        "admin_panel": "Админ панели"
+    },
+    "product": {
+        "price": "Баасы",
+        "description": "Сүрөттөмө",
+        "contact": "Байланыш",
+        "location": "Жайгашкан жери"
+    }
+}

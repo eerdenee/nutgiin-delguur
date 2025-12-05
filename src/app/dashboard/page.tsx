@@ -5,8 +5,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { Package, Heart, Settings, LogOut, CheckCircle, ChevronRight, ArrowLeft, HelpCircle, X, Sparkles, ShieldCheck, Crown, BarChart3, Clock, Flag } from "lucide-react";
 import { getUserSubscription, canPostMoreAds, SUBSCRIPTION_PLANS } from "@/lib/subscription";
+import { useCountry } from "@/context/CountryContext";
 
 export default function ProfilePage() {
+    const { t, country } = useCountry();
     const [showTooltip, setShowTooltip] = useState(false);
     const [user, setUser] = useState({
         name: "",
@@ -160,7 +162,7 @@ export default function ProfilePage() {
         ...(isAdmin ? [
             {
                 icon: ShieldCheck,
-                label: "Админ самбар",
+                label: t.dashboard.admin_panel,
                 href: "/admin"
             },
             {
@@ -171,24 +173,24 @@ export default function ProfilePage() {
         ] : []),
         {
             icon: Sparkles,
-            label: "Борлуулагч болох",
+            label: t.dashboard.become_producer,
             href: "/dashboard/upgrade"
         },
         {
             icon: Package,
-            label: "Миний бүтээгдэхүүнүүд",
+            label: t.dashboard.my_products,
             href: "/my-ads",
             count: counts.myProducts
         },
         {
             icon: Heart,
-            label: "Хадгалсан",
+            label: t.dashboard.favorites,
             href: "/favorites",
             count: counts.favorites
         },
         {
             icon: Settings,
-            label: "Тохиргоо",
+            label: t.dashboard.settings,
             href: "/settings"
         }
     ];
@@ -231,25 +233,29 @@ export default function ProfilePage() {
                                     </div>
                                 )}
                             </div>
+                            {/* Country Flag Badge */}
+                            <div className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow-md text-xl">
+                                {country.flag}
+                            </div>
                         </div>
 
                         {/* User Info */}
                         <h1 className="text-2xl font-bold text-gray-900 mb-1">
-                            {user.name || "Зочин"}
+                            {user.name || t.dashboard.guest}
                         </h1>
                         <p className="text-gray-700 font-medium mb-3">
-                            {user.phone || "Бүртгэлгүй хэрэглэгч"}
+                            {user.phone || t.dashboard.guest}
                         </p>
 
                         {/* Status Badge */}
                         {userRole === 'producer' ? (
                             <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-500 text-white shadow-sm">
-                                <span className="text-xs font-bold">✅ Баталгаажсан үйлдвэрлэгч</span>
+                                <span className="text-xs font-bold">✅ {t.dashboard.producer}</span>
                             </div>
                         ) : (
                             <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/30 backdrop-blur-sm text-gray-900 border border-white/40 shadow-sm">
                                 <span className="text-xs font-bold">
-                                    {user.phone ? "🛍️ Худалдан авагч" : "👤 Зочин"}
+                                    {user.phone ? `🛍️ ${t.dashboard.buyer}` : `👤 ${t.dashboard.guest}`}
                                 </span>
                             </div>
                         )}
@@ -343,7 +349,7 @@ export default function ProfilePage() {
                         className="w-full mt-6 mb-4 flex items-center justify-center gap-3 px-4 py-4 bg-white rounded-2xl shadow-sm hover:bg-gray-50 active:bg-gray-100 transition-colors border border-gray-100"
                     >
                         <LogOut className="w-5 h-5 text-red-500" />
-                        <span className="font-bold text-red-500">Гарах</span>
+                        <span className="font-bold text-red-500">{t.common.logout}</span>
                     </button>
                 ) : (
                     <div className="grid grid-cols-2 gap-3 mt-6 mb-4">
@@ -351,13 +357,13 @@ export default function ProfilePage() {
                             href="/login"
                             className="flex items-center justify-center px-4 py-4 bg-white rounded-2xl shadow-sm hover:bg-gray-50 transition-colors border border-gray-100 font-bold text-gray-900"
                         >
-                            Нэвтрэх
+                            {t.common.login}
                         </Link>
                         <Link
                             href="/signup"
                             className="flex items-center justify-center px-4 py-4 bg-primary text-secondary rounded-2xl shadow-sm hover:bg-yellow-400 transition-colors font-bold"
                         >
-                            Бүртгүүлэх
+                            {t.common.register}
                         </Link>
                     </div>
                 )}

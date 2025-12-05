@@ -1,0 +1,29 @@
+{
+    "common": {
+        "login": "Нэвтрэх",
+        "register": "Бүртгүүлэх",
+        "logout": "Гарах",
+        "save": "Хадгалах",
+        "cancel": "Болих",
+        "loading": "Уншиж байна...",
+        "error": "Алдаа гарлаа",
+        "success": "Амжилттай"
+    },
+    "dashboard": {
+        "welcome": "Тавтай морил",
+        "guest": "Зочин",
+        "buyer": "Худалдан авагч",
+        "producer": "Үйлдвэрлэгч",
+        "my_products": "Миний бүтээгдэхүүнүүд",
+        "favorites": "Хадгалсан",
+        "settings": "Тохиргоо",
+        "become_producer": "Борлуулагч болох",
+        "admin_panel": "Админ самбар"
+    },
+    "product": {
+        "price": "Үнэ",
+        "description": "Тайлбар",
+        "contact": "Холбоо барих",
+        "location": "Байршил"
+    }
+}

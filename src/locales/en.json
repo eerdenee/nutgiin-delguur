@@ -1,0 +1,29 @@
+{
+    "common": {
+        "login": "Login",
+        "register": "Register",
+        "logout": "Logout",
+        "save": "Save",
+        "cancel": "Cancel",
+        "loading": "Loading...",
+        "error": "Error occurred",
+        "success": "Success"
+    },
+    "dashboard": {
+        "welcome": "Welcome",
+        "guest": "Guest",
+        "buyer": "Buyer",
+        "producer": "Producer",
+        "my_products": "My Products",
+        "favorites": "Favorites",
+        "settings": "Settings",
+        "become_producer": "Become a Seller",
+        "admin_panel": "Admin Panel"
+    },
+    "product": {
+        "price": "Price",
+        "description": "Description",
+        "contact": "Contact",
+        "location": "Location"
+    }
+}
