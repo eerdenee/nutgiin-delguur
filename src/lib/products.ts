@@ -70,21 +70,20 @@ export async function createProduct(input: ProductInput): Promise<{ data: Produc
             return { data: null, error: 'Нэвтэрнэ үү' };
         }
 
-        console.log('Creating product for user:', user.id);
-        console.log('Product input:', input);
+        // Sanitize inputs
+        const sanitizedTitle = input.title.replace(/<[^>]*>/g, '').trim().slice(0, 200);
+        const sanitizedDescription = input.description?.replace(/<[^>]*>/g, '').trim().slice(0, 2000);
 
         const insertData = {
             user_id: user.id,
-            title: input.title,
-            description: input.description || null,
-            price: input.price,
+            title: sanitizedTitle,
+            description: sanitizedDescription || null,
+            price: Math.max(0, Math.floor(input.price)), // Ensure positive integer
             category: input.category,
-            images: input.images,
+            images: input.images.slice(0, 10), // Max 10 images
             location: input.location,
             status: 'active',
         };
-
-        console.log('Insert data:', insertData);
 
         const { data, error } = await (supabase
             .from('products') as any)
@@ -93,18 +92,18 @@ export async function createProduct(input: ProductInput): Promise<{ data: Produc
             .single();
 
         if (error) {
-            console.error('Create product error:', JSON.stringify(error, null, 2));
-            console.error('Error code:', error.code);
-            console.error('Error message:', error.message);
-            console.error('Error details:', error.details);
-            console.error('Error hint:', error.hint);
+            // Only log in development
+            if (process.env.NODE_ENV === 'development') {
+                console.error('Create product error:', error.message);
+            }
             return { data: null, error: error.message || 'Database error' };
         }
 
-        console.log('Product created successfully:', data);
         return { data, error: null };
     } catch (err: any) {
-        console.error('Create product exception:', err);
+        if (process.env.NODE_ENV === 'development') {
+            console.error('Create product exception:', err);
+        }
         return { data: null, error: err?.message || 'Алдаа гарлаа' };
     }
 }

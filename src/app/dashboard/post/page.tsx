@@ -234,6 +234,11 @@ function PostAdContent() {
             // 1. Upload Images to Cloudflare R2
             const uploadedImageUrls: string[] = [];
 
+            // Get auth token for upload
+            const { supabase } = await import("@/lib/supabase");
+            const { data: { session } } = await supabase.auth.getSession();
+            const authToken = session?.access_token;
+
             for (const imageFile of images) {
                 try {
                     // Use FormData for server-side image optimization
@@ -243,18 +248,26 @@ function PostAdContent() {
 
                     const response = await fetch('/api/upload', {
                         method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`,
+                        },
                         body: formData,
                     });
 
-                    if (!response.ok) throw new Error('Failed to upload image');
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.error || 'Failed to upload image');
+                    }
 
                     const { publicUrl, urls } = await response.json();
 
                     // Use large size URL or fallback to publicUrl
                     uploadedImageUrls.push(urls?.large || publicUrl);
-                } catch (err) {
-                    console.error('Image upload error:', err);
-                    alert('Зураг хуулахад алдаа гарлаа. Дахин оролдоно уу.');
+                } catch (err: any) {
+                    if (process.env.NODE_ENV === 'development') {
+                        console.error('Image upload error:', err);
+                    }
+                    alert(err?.message || 'Зураг хуулахад алдаа гарлаа. Дахин оролдоно уу.');
                     setIsLoading(false);
                     return;
                 }
