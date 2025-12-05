@@ -331,14 +331,31 @@ export default function ProfilePage() {
                     ))}
                 </div>
 
-                {/* Logout Button */}
-                <button
-                    onClick={handleLogout}
-                    className="w-full mt-6 mb-4 flex items-center justify-center gap-3 px-4 py-4 bg-white rounded-2xl shadow-sm hover:bg-gray-50 active:bg-gray-100 transition-colors border border-gray-100"
-                >
-                    <LogOut className="w-5 h-5 text-red-500" />
-                    <span className="font-bold text-red-500">Гарах</span>
-                </button>
+                {/* Auth Actions */}
+                {user.phone ? (
+                    <button
+                        onClick={handleLogout}
+                        className="w-full mt-6 mb-4 flex items-center justify-center gap-3 px-4 py-4 bg-white rounded-2xl shadow-sm hover:bg-gray-50 active:bg-gray-100 transition-colors border border-gray-100"
+                    >
+                        <LogOut className="w-5 h-5 text-red-500" />
+                        <span className="font-bold text-red-500">Гарах</span>
+                    </button>
+                ) : (
+                    <div className="grid grid-cols-2 gap-3 mt-6 mb-4">
+                        <Link
+                            href="/login"
+                            className="flex items-center justify-center px-4 py-4 bg-white rounded-2xl shadow-sm hover:bg-gray-50 transition-colors border border-gray-100 font-bold text-gray-900"
+                        >
+                            Нэвтрэх
+                        </Link>
+                        <Link
+                            href="/signup"
+                            className="flex items-center justify-center px-4 py-4 bg-primary text-secondary rounded-2xl shadow-sm hover:bg-yellow-400 transition-colors font-bold"
+                        >
+                            Бүртгүүлэх
+                        </Link>
+                    </div>
+                )}
             </div>
 
             {/* Help Tooltip Modal */}
