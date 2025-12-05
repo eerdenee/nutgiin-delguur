@@ -1,25 +1,24 @@
 const CACHE_NAME = 'nutgiin-delguur-v1';
 const OFFLINE_URL = '/offline.html';
 
+// Only cache essential static assets
 const STATIC_ASSETS = [
-    '/',
     '/offline.html',
     '/favicon.ico',
-    '/site.webmanifest',
 ];
 
-// Install event
+// Install event - cache offline page only
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-            console.log('[SW] Caching static assets');
+            console.log('[SW] Caching offline page');
             return cache.addAll(STATIC_ASSETS);
         })
     );
     self.skipWaiting();
 });
 
-// Activate event
+// Activate event - clean old caches
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
@@ -33,32 +32,35 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Fetch event - Network first, fallback to cache
+// Fetch event - Network first, fallback to offline page for navigation only
 self.addEventListener('fetch', (event) => {
-    if (event.request.mode === 'navigate') {
+    const request = event.request;
+
+    // Skip non-http(s) requests (chrome-extension, etc.)
+    if (!request.url.startsWith('http')) {
+        return;
+    }
+
+    // Skip API requests and external resources
+    if (request.url.includes('/api/') ||
+        request.url.includes('supabase') ||
+        request.url.includes('googleapis') ||
+        request.url.includes('gstatic')) {
+        return;
+    }
+
+    // Only handle navigation requests (page loads)
+    if (request.mode === 'navigate') {
         event.respondWith(
-            fetch(event.request).catch(() => {
-                return caches.match(OFFLINE_URL);
-            })
+            fetch(request)
+                .catch(() => {
+                    // Only show offline page if network truly fails
+                    return caches.match(OFFLINE_URL);
+                })
         );
         return;
     }
 
-    event.respondWith(
-        caches.match(event.request).then((cachedResponse) => {
-            if (cachedResponse) {
-                return cachedResponse;
-            }
-            return fetch(event.request).then((response) => {
-                if (!response || response.status !== 200) {
-                    return response;
-                }
-                const responseClone = response.clone();
-                caches.open(CACHE_NAME).then((cache) => {
-                    cache.put(event.request, responseClone);
-                });
-                return response;
-            });
-        })
-    );
+    // For other requests, just use network (don't cache aggressively)
+    // This prevents issues with dynamic content
 });
