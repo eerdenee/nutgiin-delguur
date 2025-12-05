@@ -187,6 +187,11 @@ function HomeContent() {
               <div className="h-0.5 bg-gradient-to-r from-secondary via-white to-transparent w-0 group-hover:w-full transition-all duration-300"></div>
             </Link>
 
+            {/* Mobile Theme Toggle - visible only on mobile */}
+            <div className="md:hidden">
+              <ThemeToggle />
+            </div>
+
             {/* Desktop Navigation - Clean & Minimal */}
             <div className="hidden md:flex items-center gap-4">
               <ThemeToggle />
