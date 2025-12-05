@@ -29,6 +29,7 @@ export default function ProfilePage() {
     const [subscription, setSubscription] = useState<any>(null);
     const [subscriptionInfo, setSubscriptionInfo] = useState<ReturnType<typeof getUserSubscription> | null>(null);
     const [adLimitInfo, setAdLimitInfo] = useState<ReturnType<typeof canPostMoreAds> | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const loadProfile = async () => {
@@ -101,6 +102,8 @@ export default function ProfilePage() {
                 }
             } catch (error) {
                 console.error("Error loading profile:", error);
+            } finally {
+                setIsLoading(false);
             }
 
             // Load counts
@@ -205,6 +208,14 @@ export default function ProfilePage() {
             href: "/settings"
         }
     ];
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 pb-24">

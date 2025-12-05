@@ -9,7 +9,6 @@ interface CountryContextType {
     country: CountryConfig;
     setCountry: (code: CountryCode) => void;
     t: any; // Translation object
-    locale: Locale;
 }
 
 const CountryContext = createContext<CountryContextType | undefined>(undefined);
@@ -21,29 +20,32 @@ export function CountryProvider({
     children: React.ReactNode;
     initialCountry?: CountryCode;
 }) {
-    const [countryCode, setCountryCode] = useState<CountryCode>(initialCountry);
+    const [country, setCountryState] = useState<CountryConfig>(COUNTRIES[initialCountry]);
+    const [t, setT] = useState(getTranslation(COUNTRIES[initialCountry].defaultLocale as Locale));
 
     // Load country from cookie on mount (client-side)
     useEffect(() => {
         const savedCountry = Cookies.get('country') as CountryCode;
         if (savedCountry && COUNTRIES[savedCountry]) {
-            setCountryCode(savedCountry);
+            setCountryState(COUNTRIES[savedCountry]);
+            setT(getTranslation(COUNTRIES[savedCountry].defaultLocale as Locale));
         }
     }, []);
 
-    const country = COUNTRIES[countryCode];
-    const locale = country.defaultLocale as Locale;
-    const t = getTranslation(locale);
-
-    const handleSetCountry = (code: CountryCode) => {
-        setCountryCode(code);
-        Cookies.set('country', code);
-        // Optional: Reload page to refresh server data
-        window.location.reload();
+    const setCountry = (code: CountryCode) => {
+        const config = COUNTRIES[code];
+        if (config) {
+            setCountryState(config);
+            setT(getTranslation(config.defaultLocale as Locale));
+            // Save to cookie
+            Cookies.set('country', code, { expires: 365 });
+            // Reload page to apply changes everywhere (middleware, etc.)
+            window.location.reload();
+        }
     };
 
     return (
-        <CountryContext.Provider value={{ country, setCountry: handleSetCountry, t, locale }}>
+        <CountryContext.Provider value={{ country, setCountry, t }}>
             {children}
         </CountryContext.Provider>
     );

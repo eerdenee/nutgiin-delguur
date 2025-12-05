@@ -14,14 +14,32 @@ export default function AdminPage() {
     const [isLoading, setIsLoading] = useState(true);
 
     // Check admin access
+    // Check admin access
     useEffect(() => {
-        const checkAdmin = () => {
-            const userRole = localStorage.getItem("userRole");
-            if (userRole !== 'admin') {
-                // Redirect if not admin
+        const checkAdmin = async () => {
+            try {
+                // Import dynamically
+                const { isSuperAdmin } = await import("@/lib/auth");
+
+                // Check server-side status
+                const isAdmin = await isSuperAdmin();
+
+                if (isAdmin) {
+                    setIsLoading(false);
+                    // Sync local storage just in case
+                    localStorage.setItem("userRole", "admin");
+                } else {
+                    // Double check local storage as fallback (sometimes auth takes time)
+                    const userRole = localStorage.getItem("userRole");
+                    if (userRole === 'admin') {
+                        setIsLoading(false);
+                    } else {
+                        router.push('/dashboard');
+                    }
+                }
+            } catch (error) {
+                console.error("Admin check failed", error);
                 router.push('/dashboard');
-            } else {
-                setIsLoading(false);
             }
         };
         checkAdmin();
