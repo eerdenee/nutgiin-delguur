@@ -10,7 +10,8 @@ interface SkeletonProps {
     animation?: "pulse" | "wave" | "none";
 }
 
-export default function Skeleton({
+// Named export for { Skeleton } import
+export function Skeleton({
     className = "",
     variant = "text",
     width,
@@ -46,33 +47,26 @@ export default function Skeleton({
     );
 }
 
+// Default export for backward compatibility
+export default Skeleton;
+
 // ===== COMPOUND SKELETONS =====
 
 export function ProductCardSkeleton({ isCompact = false }: { isCompact?: boolean }) {
     return (
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-            {/* Image */}
             <Skeleton
                 variant="rectangular"
                 className={isCompact ? "aspect-square" : "aspect-[4/3]"}
             />
-
-            {/* Content */}
             <div className={isCompact ? "p-2" : "p-3"}>
-                {/* Seller */}
                 <div className="flex items-center gap-2 mb-2">
                     <Skeleton variant="circular" width={isCompact ? 20 : 24} height={isCompact ? 20 : 24} />
                     <Skeleton variant="text" width={80} height={12} />
                 </div>
-
-                {/* Title */}
                 <Skeleton variant="text" className="mb-1" height={isCompact ? 14 : 16} />
                 <Skeleton variant="text" width="60%" height={isCompact ? 14 : 16} />
-
-                {/* Price */}
                 <Skeleton variant="text" width={100} height={isCompact ? 18 : 24} className="mt-2" />
-
-                {/* Buttons */}
                 <div className="mt-3 grid grid-cols-2 gap-2">
                     <Skeleton variant="rounded" height={isCompact ? 30 : 36} />
                     <Skeleton variant="rounded" height={isCompact ? 30 : 36} />
@@ -95,7 +89,6 @@ export function ProductGridSkeleton({ count = 8, isCompact = true }: { count?: n
 export function ProfileSkeleton() {
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Header */}
             <div className="bg-gradient-to-br from-primary via-yellow-400 to-yellow-500 px-4 pt-12 pb-12 md:pt-16">
                 <div className="max-w-4xl mx-auto flex flex-col items-center">
                     <Skeleton variant="circular" width={96} height={96} className="mb-4" />
@@ -103,8 +96,6 @@ export function ProfileSkeleton() {
                     <Skeleton variant="text" width={100} height={16} />
                 </div>
             </div>
-
-            {/* Menu Items */}
             <div className="max-w-4xl mx-auto px-4 -mt-6">
                 <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
                     {Array.from({ length: 5 }).map((_, i) => (
@@ -139,13 +130,5 @@ export function ChatListSkeleton({ count = 5 }: { count?: number }) {
     );
 }
 
-// Add shimmer animation to tailwind (add this to globals.css if needed)
-// @keyframes shimmer {
-//   0% { background-position: -200% 0; }
-//   100% { background-position: 200% 0; }
-// }
-// .animate-shimmer {
-//   background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
-//   background-size: 200% 100%;
-//   animation: shimmer 1.5s infinite;
-// }
+// Alias for MessageListSkeleton
+export const MessageListSkeleton = ChatListSkeleton;
