@@ -248,7 +248,11 @@ export default function ProfilePage() {
                         </p>
 
                         {/* Status Badge */}
-                        {userRole === 'producer' ? (
+                        {isAdmin ? (
+                            <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-600 text-white shadow-sm border border-purple-400">
+                                <span className="text-xs font-bold">🛡️ {t.dashboard.admin_panel || "Админ"}</span>
+                            </div>
+                        ) : userRole === 'producer' ? (
                             <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-500 text-white shadow-sm">
                                 <span className="text-xs font-bold">✅ {t.dashboard.producer}</span>
                             </div>

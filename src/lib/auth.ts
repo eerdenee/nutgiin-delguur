@@ -136,9 +136,22 @@ export const SUPER_ADMIN_EMAILS = [
  */
 export const isSuperAdmin = async (): Promise<boolean> => {
     try {
-        const profile = await getCurrentProfile();
-        if (!profile || !profile.email) return false;
-        return SUPER_ADMIN_EMAILS.includes(profile.email);
+        // 1. Check Auth User Email
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user || !user.email) return false;
+
+        if (SUPER_ADMIN_EMAILS.includes(user.email)) return true;
+
+        // 2. Check Profile Role from DB
+        const { data: profile } = await (supabase
+            .from('profiles') as any)
+            .select('role')
+            .eq('id', user.id)
+            .single();
+
+        if (profile && profile.role === 'admin') return true;
+
+        return false;
     } catch {
         return false;
     }
