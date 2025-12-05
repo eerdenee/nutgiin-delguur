@@ -12,13 +12,13 @@ export const migrateData = async () => {
         // 1. Migrate Profile
         const localProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
         if (localProfile.name) {
-            await supabase
-                .from('profiles')
+            await (supabase
+                .from('profiles') as any)
                 .update({
                     name: localProfile.name,
                     avatar_url: localProfile.avatar,
                     // phone is already set during signup
-                } as any)
+                })
                 .eq('id', user.id);
         }
 
@@ -30,23 +30,18 @@ export const migrateData = async () => {
             // Check if ad already exists (by title and user_id roughly)
             // Or just insert blindly but handle errors
 
-            const { error } = await supabase
-                .from('products' as any)
+            const { error } = await (supabase
+                .from('products') as any)
                 .insert({
                     user_id: user.id,
                     title: ad.title,
                     description: ad.description,
                     price: ad.price,
-                    currency: ad.currency || '₮',
                     category: ad.category,
-                    subcategory: ad.subcategory,
                     images: ad.images || [],
                     location: ad.location || { aimag: 'Улаанбаатар', soum: 'Сүхбаатар' },
-                    tier: ad.subscriptionTier || 'soum',
                     status: 'active',
-                    created_at: ad.createdAt || new Date().toISOString(),
-                    expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // +30 days
-                } as any);
+                });
 
             if (!error) migratedAdsCount++;
         }

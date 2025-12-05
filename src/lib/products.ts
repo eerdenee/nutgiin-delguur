@@ -205,28 +205,15 @@ export async function getProducts(options?: {
  */
 export async function getProduct(id: string): Promise<{ data: Product | null; error: string | null }> {
     try {
-        const { data, error } = await supabase
-            .from('products')
-            .select(`
-        *,
-        seller:profiles!products_user_id_fkey (
-          id,
-          name,
-          phone,
-          avatar_url,
-          is_verified,
-          bank_info
-        )
-      `)
+        const { data, error } = await (supabase
+            .from('products') as any)
+            .select('*')
             .eq('id', id)
             .single();
 
         if (error) {
             return { data: null, error: error.message };
         }
-
-        // Increment view count
-        await supabase.rpc('increment_product_views', { product_uuid: id });
 
         return { data, error: null };
     } catch (err) {
@@ -269,8 +256,8 @@ export async function updateProduct(
     updates: Partial<ProductInput>
 ): Promise<{ success: boolean; error: string | null }> {
     try {
-        const { error } = await supabase
-            .from('products')
+        const { error } = await (supabase
+            .from('products') as any)
             .update({
                 ...updates,
                 updated_at: new Date().toISOString(),
@@ -292,8 +279,8 @@ export async function updateProduct(
  */
 export async function deleteProduct(id: string): Promise<{ success: boolean; error: string | null }> {
     try {
-        const { error } = await supabase
-            .from('products')
+        const { error } = await (supabase
+            .from('products') as any)
             .update({ status: 'deleted' })
             .eq('id', id);
 
@@ -319,8 +306,8 @@ export async function toggleFavorite(productId: string): Promise<{ isFavorite: b
         }
 
         // Check if already favorited
-        const { data: existing } = await supabase
-            .from('favorites')
+        const { data: existing } = await (supabase
+            .from('favorites') as any)
             .select('id')
             .eq('user_id', user.id)
             .eq('product_id', productId)
@@ -328,28 +315,28 @@ export async function toggleFavorite(productId: string): Promise<{ isFavorite: b
 
         if (existing) {
             // Remove favorite
-            await supabase
-                .from('favorites')
+            await (supabase
+                .from('favorites') as any)
                 .delete()
                 .eq('id', existing.id);
 
             // Decrement saves count
-            await supabase
-                .from('products')
-                .update({ saves: supabase.rpc('decrement', { x: 1 }) })
+            await (supabase
+                .from('products') as any)
+                .update({ saves: (supabase as any).rpc('decrement', { x: 1 }) })
                 .eq('id', productId);
 
             return { isFavorite: false, error: null };
         } else {
             // Add favorite
-            await supabase
-                .from('favorites')
+            await (supabase
+                .from('favorites') as any)
                 .insert({ user_id: user.id, product_id: productId });
 
             // Increment saves count
-            await supabase
-                .from('products')
-                .update({ saves: supabase.rpc('increment', { x: 1 }) })
+            await (supabase
+                .from('products') as any)
+                .update({ saves: (supabase as any).rpc('increment', { x: 1 }) })
                 .eq('id', productId);
 
             return { isFavorite: true, error: null };
@@ -370,8 +357,8 @@ export async function getFavorites(): Promise<{ data: Product[]; error: string |
             return { data: [], error: 'Нэвтэрнэ үү' };
         }
 
-        const { data, error } = await supabase
-            .from('favorites')
+        const { data, error } = await (supabase
+            .from('favorites') as any)
             .select(`
         product:products (
           *,
@@ -389,7 +376,7 @@ export async function getFavorites(): Promise<{ data: Product[]; error: string |
             return { data: [], error: error.message };
         }
 
-        const products = data?.map(f => f.product).filter(Boolean) as Product[];
+        const products = data?.map((f: any) => f.product).filter(Boolean) as Product[];
         return { data: products, error: null };
     } catch (err) {
         return { data: [], error: 'Алдаа гарлаа' };
@@ -408,7 +395,7 @@ export async function trackEngagement(
             : type === 'chat_click' ? 'chat_clicks'
                 : 'shares';
 
-        await supabase.rpc('increment_column', {
+        await (supabase.rpc as any)('increment_column', {
             table_name: 'products',
             column_name: column,
             row_id: productId

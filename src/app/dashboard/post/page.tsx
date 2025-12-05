@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { ArrowLeft, Camera, MapPin, Loader2, Banknote, Info, Copy, Check, Video, AlertTriangle, Package } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -21,7 +21,7 @@ const BANKS = [
     { id: "most", name: "Мост Мани" },
 ];
 
-export default function PostAdPage() {
+function PostAdContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const editId = searchParams.get('id');
@@ -717,5 +717,17 @@ export default function PostAdPage() {
                 </form>
             </div>
         </div>
+    );
+}
+
+export default function PostAdPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex items-center justify-center min-h-screen">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+        }>
+            <PostAdContent />
+        </Suspense>
     );
 }
