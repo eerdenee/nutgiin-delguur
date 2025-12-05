@@ -4,6 +4,7 @@ import "./globals.css";
 import BottomNav from "@/components/BottomNav";
 import Footer from "@/components/Footer";
 import { CountryProvider } from "@/context/CountryContext";
+import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -98,20 +99,34 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="mn">
+        <html lang="mn" suppressHydrationWarning>
             <head>
                 <link rel="preconnect" href="https://fonts.googleapis.com" />
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: `
+                            (function() {
+                                const theme = localStorage.getItem('theme');
+                                if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                                    document.documentElement.classList.add('dark');
+                                }
+                            })();
+                        `,
+                    }}
+                />
             </head>
             <body
-                className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} antialiased`}
+                className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} antialiased bg-background text-foreground`}
             >
                 <CountryProvider>
                     {children}
                     <Footer />
                     <BottomNav />
                 </CountryProvider>
+                <ServiceWorkerRegistration />
             </body>
         </html>
     );
 }
+

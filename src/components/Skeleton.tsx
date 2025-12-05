@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import React from "react";
 
 interface SkeletonProps {
     className?: string;
@@ -10,21 +10,18 @@ interface SkeletonProps {
     animation?: "pulse" | "wave" | "none";
 }
 
-/**
- * Skeleton loading component
- */
-export function Skeleton({
-    className,
-    variant = "rectangular",
+export default function Skeleton({
+    className = "",
+    variant = "text",
     width,
     height,
     animation = "pulse",
 }: SkeletonProps) {
-    const baseStyles = "bg-gray-200";
+    const baseStyles = "bg-gray-200 dark:bg-gray-700";
 
     const animationStyles = {
         pulse: "animate-pulse",
-        wave: "animate-shimmer bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%]",
+        wave: "animate-shimmer",
         none: "",
     };
 
@@ -32,133 +29,123 @@ export function Skeleton({
         text: "rounded",
         circular: "rounded-full",
         rectangular: "",
-        rounded: "rounded-lg",
+        rounded: "rounded-xl",
     };
+
+    const style: React.CSSProperties = {};
+    if (width) style.width = typeof width === "number" ? `${width}px` : width;
+    if (height) style.height = typeof height === "number" ? `${height}px` : height;
 
     return (
         <div
-            className={cn(
-                baseStyles,
-                animationStyles[animation],
-                variantStyles[variant],
-                className
-            )}
-            style={{
-                width: width,
-                height: height,
-            }}
+            className={`${baseStyles} ${animationStyles[animation]} ${variantStyles[variant]} ${className}`}
+            style={style}
+            role="status"
+            aria-label="Уншиж байна..."
         />
     );
 }
 
-/**
- * Product Card Skeleton
- */
-export function ProductCardSkeleton() {
+// ===== COMPOUND SKELETONS =====
+
+export function ProductCardSkeleton({ isCompact = false }: { isCompact?: boolean }) {
     return (
-        <div className="bg-white rounded-xl overflow-hidden border border-gray-100">
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
             {/* Image */}
-            <Skeleton className="w-full h-48" />
+            <Skeleton
+                variant="rectangular"
+                className={isCompact ? "aspect-square" : "aspect-[4/3]"}
+            />
 
             {/* Content */}
-            <div className="p-4 space-y-3">
+            <div className={isCompact ? "p-2" : "p-3"}>
+                {/* Seller */}
+                <div className="flex items-center gap-2 mb-2">
+                    <Skeleton variant="circular" width={isCompact ? 20 : 24} height={isCompact ? 20 : 24} />
+                    <Skeleton variant="text" width={80} height={12} />
+                </div>
+
                 {/* Title */}
-                <Skeleton className="h-5 w-3/4 rounded" />
+                <Skeleton variant="text" className="mb-1" height={isCompact ? 14 : 16} />
+                <Skeleton variant="text" width="60%" height={isCompact ? 14 : 16} />
 
                 {/* Price */}
-                <Skeleton className="h-6 w-1/2 rounded" />
+                <Skeleton variant="text" width={100} height={isCompact ? 18 : 24} className="mt-2" />
 
-                {/* Location */}
-                <div className="flex items-center gap-2">
-                    <Skeleton className="h-4 w-4 rounded-full" />
-                    <Skeleton className="h-4 w-24 rounded" />
-                </div>
-
-                {/* Stats */}
-                <div className="flex gap-4 pt-2">
-                    <Skeleton className="h-4 w-12 rounded" />
-                    <Skeleton className="h-4 w-12 rounded" />
+                {/* Buttons */}
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                    <Skeleton variant="rounded" height={isCompact ? 30 : 36} />
+                    <Skeleton variant="rounded" height={isCompact ? 30 : 36} />
                 </div>
             </div>
         </div>
     );
 }
 
-/**
- * Product Grid Skeleton (multiple cards)
- */
-export function ProductGridSkeleton({ count = 6 }: { count?: number }) {
+export function ProductGridSkeleton({ count = 8, isCompact = true }: { count?: number; isCompact?: boolean }) {
     return (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4">
             {Array.from({ length: count }).map((_, i) => (
-                <ProductCardSkeleton key={i} />
+                <ProductCardSkeleton key={i} isCompact={isCompact} />
             ))}
         </div>
     );
 }
 
-/**
- * Profile Skeleton
- */
 export function ProfileSkeleton() {
     return (
-        <div className="flex items-center gap-4">
-            <Skeleton variant="circular" className="w-12 h-12" />
-            <div className="space-y-2">
-                <Skeleton className="h-4 w-32 rounded" />
-                <Skeleton className="h-3 w-24 rounded" />
+        <div className="min-h-screen bg-gray-50">
+            {/* Header */}
+            <div className="bg-gradient-to-br from-primary via-yellow-400 to-yellow-500 px-4 pt-12 pb-12 md:pt-16">
+                <div className="max-w-4xl mx-auto flex flex-col items-center">
+                    <Skeleton variant="circular" width={96} height={96} className="mb-4" />
+                    <Skeleton variant="text" width={150} height={28} className="mb-2" />
+                    <Skeleton variant="text" width={100} height={16} />
+                </div>
+            </div>
+
+            {/* Menu Items */}
+            <div className="max-w-4xl mx-auto px-4 -mt-6">
+                <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                        <div key={i} className="flex items-center justify-between px-4 py-4 border-b border-gray-100 last:border-b-0">
+                            <div className="flex items-center gap-3">
+                                <Skeleton variant="circular" width={40} height={40} />
+                                <Skeleton variant="text" width={120} height={18} />
+                            </div>
+                            <Skeleton variant="circular" width={20} height={20} />
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );
 }
 
-/**
- * Message List Skeleton
- */
-export function MessageListSkeleton({ count = 5 }: { count?: number }) {
+export function ChatListSkeleton({ count = 5 }: { count?: number }) {
     return (
-        <div className="space-y-4">
+        <div className="divide-y divide-gray-100">
             {Array.from({ length: count }).map((_, i) => (
-                <div key={i} className="flex items-center gap-3 p-3 bg-white rounded-lg">
-                    <Skeleton variant="circular" className="w-10 h-10" />
-                    <div className="flex-1 space-y-2">
-                        <Skeleton className="h-4 w-1/3 rounded" />
-                        <Skeleton className="h-3 w-2/3 rounded" />
+                <div key={i} className="flex items-center gap-3 p-4">
+                    <Skeleton variant="circular" width={48} height={48} />
+                    <div className="flex-1">
+                        <Skeleton variant="text" width="70%" height={16} className="mb-2" />
+                        <Skeleton variant="text" width="40%" height={14} />
                     </div>
-                    <Skeleton className="h-3 w-12 rounded" />
+                    <Skeleton variant="text" width={40} height={12} />
                 </div>
             ))}
         </div>
     );
 }
 
-/**
- * Stats Card Skeleton
- */
-export function StatsCardSkeleton() {
-    return (
-        <div className="bg-white rounded-xl p-4 space-y-2">
-            <Skeleton className="h-4 w-20 rounded" />
-            <Skeleton className="h-8 w-16 rounded" />
-        </div>
-    );
-}
-
-/**
- * Form Skeleton
- */
-export function FormSkeleton() {
-    return (
-        <div className="space-y-6">
-            {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="space-y-2">
-                    <Skeleton className="h-4 w-24 rounded" />
-                    <Skeleton className="h-12 w-full rounded-lg" />
-                </div>
-            ))}
-            <Skeleton className="h-12 w-full rounded-lg" />
-        </div>
-    );
-}
-
-export default Skeleton;
+// Add shimmer animation to tailwind (add this to globals.css if needed)
+// @keyframes shimmer {
+//   0% { background-position: -200% 0; }
+//   100% { background-position: 200% 0; }
+// }
+// .animate-shimmer {
+//   background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+//   background-size: 200% 100%;
+//   animation: shimmer 1.5s infinite;
+// }

@@ -7,7 +7,22 @@
         "cancel": "Болих",
         "loading": "Уншиж байна...",
         "error": "Алдаа гарлаа",
-        "success": "Амжилттай"
+        "success": "Амжилттай",
+        "back": "Буцах",
+        "next": "Үргэлжлүүлэх",
+        "submit": "Илгээх",
+        "search": "Хайх",
+        "filter": "Шүүлтүүр",
+        "sort": "Эрэмбэлэх",
+        "all": "Бүгд",
+        "close": "Хаах",
+        "confirm": "Батлах",
+        "delete": "Устгах",
+        "edit": "Засах",
+        "share": "Хуваалцах",
+        "report": "Мэдээлэх",
+        "view_all": "Бүгдийг харах",
+        "no_results": "Үр дүн олдсонгүй"
     },
     "dashboard": {
         "welcome": "Тавтай морил",
@@ -18,12 +33,115 @@
         "favorites": "Хадгалсан",
         "settings": "Тохиргоо",
         "become_producer": "Борлуулагч болох",
-        "admin_panel": "Админ самбар"
+        "admin_panel": "Админ самбар",
+        "stats": "Статистик",
+        "messages": "Зурвас",
+        "notifications": "Мэдэгдэл",
+        "subscription": "Төлбөрийн багц",
+        "upgrade": "Сайжруулах",
+        "profile": "Профайл"
     },
     "product": {
         "price": "Үнэ",
         "description": "Тайлбар",
         "contact": "Холбоо барих",
-        "location": "Байршил"
+        "location": "Байршил",
+        "category": "Ангилал",
+        "add_product": "Бүтээгдэхүүн нэмэх",
+        "edit_product": "Засах",
+        "delete_product": "Устгах",
+        "call_seller": "Залгах",
+        "chat_seller": "Чатлах",
+        "save_product": "Хадгалах",
+        "share_product": "Хуваалцах",
+        "report_product": "Мэдээлэх",
+        "sold": "Зарагдсан",
+        "available": "Идэвхтэй",
+        "pending": "Хүлээгдэж буй",
+        "views": "Үзсэн",
+        "saves": "Хадгалсан"
+    },
+    "categories": {
+        "all": "Бүгд",
+        "food": "Хүнс",
+        "dairy": "Сүү",
+        "meat": "Мах",
+        "crafts": "Гар урлал",
+        "textiles": "Нэхмэл",
+        "leather": "Арьс шир",
+        "services": "Үйлчилгээ"
+    },
+    "location": {
+        "select_location": "Байршил сонгох",
+        "select_aimag": "Аймаг сонгох",
+        "select_soum": "Сум сонгох",
+        "all_soums": "Бүх сумд",
+        "ulaanbaatar": "Улаанбаатар"
+    },
+    "auth": {
+        "phone_number": "Утасны дугаар",
+        "password": "Нууц үг",
+        "confirm_password": "Нууц үг баталгаажуулах",
+        "forgot_password": "Нууц үгээ мартсан?",
+        "remember_me": "Намайг сана",
+        "login_with_google": "Google-ээр нэвтрэх",
+        "no_account": "Бүртгэлгүй юу?",
+        "has_account": "Бүртгэлтэй юу?",
+        "create_account": "Бүртгүүлэх",
+        "invalid_phone": "Утасны дугаар буруу байна",
+        "invalid_password": "Нууц үг буруу байна"
+    },
+    "report": {
+        "title": "Зар мэдээлэх",
+        "select_reason": "Шалтгаан сонгох",
+        "illegal": "Хууль бус бараа",
+        "scam": "Залилан / Хуурамч",
+        "spam": "Спам / Давхардсан",
+        "other": "Бусад",
+        "description_optional": "Нэмэлт тайлбар (заавал биш)",
+        "submit_report": "Илгээх",
+        "report_sent": "Мэдээлэл илгээгдлээ",
+        "report_checking": "Бид таны мэдээллийг шалгах болно",
+        "already_reported": "Та энэ зарыг мэдээлсэн байна"
+    },
+    "footer": {
+        "about": "Бидний тухай",
+        "contact_us": "Холбоо барих",
+        "help": "Тусламж",
+        "faq": "Түгээмэл асуулт",
+        "terms": "Үйлчилгээний нөхцөл",
+        "privacy": "Нууцлалын бодлого",
+        "safety": "Аюулгүй ажиллагаа",
+        "feedback": "Санал хүсэлт",
+        "follow_us": "Биднийг дагаарай",
+        "all_rights": "Бүх эрх хуулиар хамгаалагдсан"
+    },
+    "errors": {
+        "network_error": "Сүлжээний алдаа гарлаа",
+        "server_error": "Серверийн алдаа",
+        "not_found": "Олдсонгүй",
+        "unauthorized": "Зөвшөөрөлгүй",
+        "forbidden": "Хандахыг хориглов",
+        "bad_request": "Буруу хүсэлт",
+        "try_again": "Дахин оролдоно уу"
+    },
+    "validation": {
+        "required": "Энэ талбар заавал бөглөнө",
+        "min_length": "Хамгийн багадаа {min} тэмдэгт байх ёстой",
+        "max_length": "Хамгийн ихдээ {max} тэмдэгт байх ёстой",
+        "invalid_format": "Буруу формат"
+    },
+    "offline": {
+        "title": "Интернэт холболтгүй",
+        "message": "Таны интернэт холболт тасарсан байна",
+        "retry": "Дахин оролдох",
+        "tips_title": "Шийдэл",
+        "tip_wifi": "WiFi эсвэл мобайл дата асаалттай эсэхийг шалгах",
+        "tip_airplane": "Онгоцны горим унтраалттай эсэхийг шалгах",
+        "tip_restart": "Холболтоо дахин эхлүүлэх"
+    },
+    "meta": {
+        "title": "Нутгийн Дэлгүүр - Монгол Үйлдвэрлэлийн Талбар",
+        "description": "Монголын үндэсний үйлдвэрлэгчдийн бүтээгдэхүүнийг түгээх цахим платформ"
     }
 }

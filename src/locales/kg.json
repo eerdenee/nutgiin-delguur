@@ -7,7 +7,22 @@
         "cancel": "Жокко чыгаруу",
         "loading": "Жүктөлүүдө...",
         "error": "Ката кетти",
-        "success": "Ийгиликтүү"
+        "success": "Ийгиликтүү",
+        "back": "Артка",
+        "next": "Кийинки",
+        "submit": "Жөнөтүү",
+        "search": "Издөө",
+        "filter": "Фильтр",
+        "sort": "Иреттөө",
+        "all": "Баары",
+        "close": "Жабуу",
+        "confirm": "Ырастоо",
+        "delete": "Өчүрүү",
+        "edit": "Түзөтүү",
+        "share": "Бөлүшүү",
+        "report": "Билдирүү",
+        "view_all": "Баарын көрүү",
+        "no_results": "Жыйынтык табылган жок"
     },
     "dashboard": {
         "welcome": "Кош келиңиз",
@@ -18,12 +33,115 @@
         "favorites": "Сакталгандар",
         "settings": "Жөндөөлөр",
         "become_producer": "Сатуучу болуу",
-        "admin_panel": "Админ панели"
+        "admin_panel": "Админ панели",
+        "stats": "Статистика",
+        "messages": "Билдирүүлөр",
+        "notifications": "Эскертмелер",
+        "subscription": "Жазылуу",
+        "upgrade": "Жакшыртуу",
+        "profile": "Профиль"
     },
     "product": {
         "price": "Баасы",
         "description": "Сүрөттөмө",
         "contact": "Байланыш",
-        "location": "Жайгашкан жери"
+        "location": "Жайгашкан жери",
+        "category": "Категория",
+        "add_product": "Товар кошуу",
+        "edit_product": "Түзөтүү",
+        "delete_product": "Өчүрүү",
+        "call_seller": "Чакыруу",
+        "chat_seller": "Чат",
+        "save_product": "Сактоо",
+        "share_product": "Бөлүшүү",
+        "report_product": "Билдирүү",
+        "sold": "Сатылды",
+        "available": "Жеткиликтүү",
+        "pending": "Күтүүдө",
+        "views": "Көрүүлөр",
+        "saves": "Сактоолор"
+    },
+    "categories": {
+        "all": "Баары",
+        "food": "Тамак-аш",
+        "dairy": "Сүт",
+        "meat": "Эт",
+        "crafts": "Кол өнөрчүлүк",
+        "textiles": "Токуу",
+        "leather": "Тери",
+        "services": "Кызматтар"
+    },
+    "location": {
+        "select_location": "Жерди тандаңыз",
+        "select_aimag": "Облусту тандаңыз",
+        "select_soum": "Райондо тандаңыз",
+        "all_soums": "Бардык райондор",
+        "ulaanbaatar": "Бишкек"
+    },
+    "auth": {
+        "phone_number": "Телефон номери",
+        "password": "Сырсөз",
+        "confirm_password": "Сырсөздү ырастоо",
+        "forgot_password": "Сырсөзүңүздү унуттуңузбу?",
+        "remember_me": "Мени эстеп кал",
+        "login_with_google": "Google менен кирүү",
+        "no_account": "Аккаунтуңуз жокпу?",
+        "has_account": "Аккаунтуңуз барбы?",
+        "create_account": "Катталуу",
+        "invalid_phone": "Телефон номери туура эмес",
+        "invalid_password": "Сырсөз туура эмес"
+    },
+    "report": {
+        "title": "Жарнаманы билдирүү",
+        "select_reason": "Себеп тандаңыз",
+        "illegal": "Мыйзамсыз товар",
+        "scam": "Алдамчылык",
+        "spam": "Спам",
+        "other": "Башка",
+        "description_optional": "Кошумча сүрөттөмө (милдеттүү эмес)",
+        "submit_report": "Жөнөтүү",
+        "report_sent": "Билдирүү жөнөтүлдү",
+        "report_checking": "Биз маалыматыңызды текшеребиз",
+        "already_reported": "Сиз бул жарнаманы билдирип бүттүңүз"
+    },
+    "footer": {
+        "about": "Биз жөнүндө",
+        "contact_us": "Байланыш",
+        "help": "Жардам",
+        "faq": "Көп берилүүчү суроолор",
+        "terms": "Кызмат көрсөтүү шарттары",
+        "privacy": "Купуялык саясаты",
+        "safety": "Коопсуздук",
+        "feedback": "Пикирлер",
+        "follow_us": "Бизди ээрчиңиз",
+        "all_rights": "Бардык укуктар корголгон"
+    },
+    "errors": {
+        "network_error": "Түйүн катасы",
+        "server_error": "Сервер катасы",
+        "not_found": "Табылган жок",
+        "unauthorized": "Уруксатсыз",
+        "forbidden": "Тыюу салынган",
+        "bad_request": "Туура эмес сурам",
+        "try_again": "Кайра аракет кылыңыз"
+    },
+    "validation": {
+        "required": "Бул талаа милдеттүү",
+        "min_length": "Эң аз {min} белги болушу керек",
+        "max_length": "Эң көп {max} белги болушу керек",
+        "invalid_format": "Туура эмес формат"
+    },
+    "offline": {
+        "title": "Интернет байланышы жок",
+        "message": "Сиздин интернет байланышыңыз үзүлдү",
+        "retry": "Кайра аракет",
+        "tips_title": "Чечим",
+        "tip_wifi": "WiFi же мобилдик дата күйүп турганын текшериңиз",
+        "tip_airplane": "Учак режими өчүрүлгөнүн текшериңиз",
+        "tip_restart": "Байланышты кайра баштаңыз"
+    },
+    "meta": {
+        "title": "Жергиликтүү Дүкөн - Кыргыз Өндүрүшү",
+        "description": "Кыргызстандын улуттук өндүрүүчүлөрүнүн товарларын жайылтуучу санариптик платформа"
     }
 }

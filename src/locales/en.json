@@ -7,7 +7,22 @@
         "cancel": "Cancel",
         "loading": "Loading...",
         "error": "Error occurred",
-        "success": "Success"
+        "success": "Success",
+        "back": "Back",
+        "next": "Next",
+        "submit": "Submit",
+        "search": "Search",
+        "filter": "Filter",
+        "sort": "Sort",
+        "all": "All",
+        "close": "Close",
+        "confirm": "Confirm",
+        "delete": "Delete",
+        "edit": "Edit",
+        "share": "Share",
+        "report": "Report",
+        "view_all": "View All",
+        "no_results": "No results found"
     },
     "dashboard": {
         "welcome": "Welcome",
@@ -18,12 +33,115 @@
         "favorites": "Favorites",
         "settings": "Settings",
         "become_producer": "Become a Seller",
-        "admin_panel": "Admin Panel"
+        "admin_panel": "Admin Panel",
+        "stats": "Statistics",
+        "messages": "Messages",
+        "notifications": "Notifications",
+        "subscription": "Subscription",
+        "upgrade": "Upgrade",
+        "profile": "Profile"
     },
     "product": {
         "price": "Price",
         "description": "Description",
         "contact": "Contact",
-        "location": "Location"
+        "location": "Location",
+        "category": "Category",
+        "add_product": "Add Product",
+        "edit_product": "Edit",
+        "delete_product": "Delete",
+        "call_seller": "Call",
+        "chat_seller": "Chat",
+        "save_product": "Save",
+        "share_product": "Share",
+        "report_product": "Report",
+        "sold": "Sold",
+        "available": "Available",
+        "pending": "Pending",
+        "views": "Views",
+        "saves": "Saves"
+    },
+    "categories": {
+        "all": "All",
+        "food": "Food",
+        "dairy": "Dairy",
+        "meat": "Meat",
+        "crafts": "Crafts",
+        "textiles": "Textiles",
+        "leather": "Leather",
+        "services": "Services"
+    },
+    "location": {
+        "select_location": "Select Location",
+        "select_aimag": "Select Province",
+        "select_soum": "Select District",
+        "all_soums": "All Districts",
+        "ulaanbaatar": "Ulaanbaatar"
+    },
+    "auth": {
+        "phone_number": "Phone Number",
+        "password": "Password",
+        "confirm_password": "Confirm Password",
+        "forgot_password": "Forgot Password?",
+        "remember_me": "Remember Me",
+        "login_with_google": "Login with Google",
+        "no_account": "Don't have an account?",
+        "has_account": "Already have an account?",
+        "create_account": "Create Account",
+        "invalid_phone": "Invalid phone number",
+        "invalid_password": "Invalid password"
+    },
+    "report": {
+        "title": "Report Listing",
+        "select_reason": "Select Reason",
+        "illegal": "Illegal Items",
+        "scam": "Scam / Fake",
+        "spam": "Spam / Duplicate",
+        "other": "Other",
+        "description_optional": "Additional description (optional)",
+        "submit_report": "Submit",
+        "report_sent": "Report Submitted",
+        "report_checking": "We will review your report",
+        "already_reported": "You have already reported this listing"
+    },
+    "footer": {
+        "about": "About Us",
+        "contact_us": "Contact Us",
+        "help": "Help",
+        "faq": "FAQ",
+        "terms": "Terms of Service",
+        "privacy": "Privacy Policy",
+        "safety": "Safety",
+        "feedback": "Feedback",
+        "follow_us": "Follow Us",
+        "all_rights": "All rights reserved"
+    },
+    "errors": {
+        "network_error": "Network error",
+        "server_error": "Server error",
+        "not_found": "Not found",
+        "unauthorized": "Unauthorized",
+        "forbidden": "Forbidden",
+        "bad_request": "Bad request",
+        "try_again": "Please try again"
+    },
+    "validation": {
+        "required": "This field is required",
+        "min_length": "Must be at least {min} characters",
+        "max_length": "Must be at most {max} characters",
+        "invalid_format": "Invalid format"
+    },
+    "offline": {
+        "title": "No Internet Connection",
+        "message": "Your internet connection was lost",
+        "retry": "Retry",
+        "tips_title": "Solutions",
+        "tip_wifi": "Check if WiFi or mobile data is enabled",
+        "tip_airplane": "Check if airplane mode is disabled",
+        "tip_restart": "Restart your connection"
+    },
+    "meta": {
+        "title": "Nutgiin Delguur - Mongolian Marketplace",
+        "description": "Digital platform for distributing products from national producers of Mongolia"
     }
 }

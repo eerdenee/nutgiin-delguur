@@ -2,6 +2,7 @@
 
 @theme {
   --color-primary: #F4D03F;
+  --color-primary-dark: #d4a600;
   --color-secondary: #111111;
   --color-background: #F9FAFB;
   --color-foreground: #111111;
@@ -10,17 +11,82 @@
   --font-montserrat: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
 }
 
+/* ===== LIGHT MODE (DEFAULT) ===== */
 :root {
   --background: #F9FAFB;
   --foreground: #111111;
+  --card-bg: #ffffff;
+  --card-border: #e5e7eb;
+  --muted: #6B7280;
+  --muted-foreground: #9CA3AF;
+  --primary: #F4D03F;
+  --primary-foreground: #111111;
+  --destructive: #EF4444;
+  --destructive-foreground: #ffffff;
+  --success: #22C55E;
+  --success-foreground: #ffffff;
+  --ring: #F4D03F;
+}
+
+/* ===== DARK MODE ===== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0f172a;
+    --foreground: #f1f5f9;
+    --card-bg: #1e293b;
+    --card-border: #334155;
+    --muted: #94a3b8;
+    --muted-foreground: #64748b;
+    --primary: #facc15;
+    --primary-foreground: #0f172a;
+    --destructive: #f87171;
+    --destructive-foreground: #0f172a;
+    --success: #4ade80;
+    --success-foreground: #0f172a;
+    --ring: #facc15;
+  }
+}
+
+/* ===== DARK MODE CLASS SUPPORT ===== */
+.dark {
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+  --card-bg: #1e293b;
+  --card-border: #334155;
+  --muted: #94a3b8;
+  --muted-foreground: #64748b;
+  --primary: #facc15;
+  --primary-foreground: #0f172a;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* ===== CUSTOM SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--muted-foreground);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground);
+}
+
+/* ===== UTILITY CLASSES ===== */
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar {
     display: none;
@@ -29,5 +95,69 @@ body {
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  /* Safe area padding for mobile */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  /* Focus ring for accessibility */
+  .focus-ring:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--primary);
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    :root {
+      --primary: #FFD700;
+      --foreground: #000000;
+      --background: #ffffff;
+    }
+  }
+
+  /* Shake animation for errors */
+  .animate-shake {
+    animation: shake 0.5s ease-in-out;
+  }
+
+  @keyframes shake {
+
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+
+    25% {
+      transform: translateX(-5px);
+    }
+
+    75% {
+      transform: translateX(5px);
+    }
+  }
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  .no-print {
+    display: none !important;
   }
 }
