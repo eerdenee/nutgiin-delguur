@@ -26,28 +26,14 @@
   --success: #22C55E;
   --success-foreground: #ffffff;
   --ring: #F4D03F;
-}
-
-/* ===== DARK MODE ===== */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f172a;
-    --foreground: #f1f5f9;
-    --card-bg: #1e293b;
-    --card-border: #334155;
-    --muted: #94a3b8;
-    --muted-foreground: #64748b;
-    --primary: #facc15;
-    --primary-foreground: #0f172a;
-    --destructive: #f87171;
-    --destructive-foreground: #0f172a;
-    --success: #4ade80;
-    --success-foreground: #0f172a;
-    --ring: #facc15;
-  }
+  --header-bg: #F4D03F;
+  --input-bg: #ffffff;
+  --text-primary: #111111;
+  --text-secondary: #6B7280;
 }
 
 /* ===== DARK MODE CLASS SUPPORT ===== */
+html.dark,
 .dark {
   --background: #0f172a;
   --foreground: #f1f5f9;
@@ -57,6 +43,89 @@
   --muted-foreground: #64748b;
   --primary: #facc15;
   --primary-foreground: #0f172a;
+  --destructive: #f87171;
+  --destructive-foreground: #0f172a;
+  --success: #4ade80;
+  --success-foreground: #0f172a;
+  --ring: #facc15;
+  --header-bg: #1e293b;
+  --input-bg: #334155;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+}
+
+/* Dark mode overrides for common elements */
+html.dark body,
+.dark body {
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+}
+
+html.dark .bg-primary,
+.dark .bg-primary {
+  background-color: var(--primary) !important;
+}
+
+html.dark .bg-white,
+.dark .bg-white {
+  background-color: var(--card-bg) !important;
+}
+
+html.dark .bg-gray-50,
+.dark .bg-gray-50 {
+  background-color: var(--background) !important;
+}
+
+html.dark .bg-gray-100,
+.dark .bg-gray-100 {
+  background-color: var(--card-border) !important;
+}
+
+html.dark .text-gray-900,
+.dark .text-gray-900 {
+  color: var(--foreground) !important;
+}
+
+html.dark .text-gray-700,
+.dark .text-gray-700 {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .text-gray-600,
+.dark .text-gray-600 {
+  color: var(--muted) !important;
+}
+
+html.dark .text-gray-500,
+.dark .text-gray-500 {
+  color: var(--muted-foreground) !important;
+}
+
+html.dark .text-gray-400,
+.dark .text-gray-400 {
+  color: var(--muted-foreground) !important;
+}
+
+html.dark .border-gray-200,
+.dark .border-gray-200 {
+  border-color: var(--card-border) !important;
+}
+
+html.dark .border-gray-100,
+.dark .border-gray-100 {
+  border-color: var(--card-border) !important;
+}
+
+html.dark input,
+.dark input {
+  background-color: var(--input-bg) !important;
+  color: var(--foreground) !important;
+  border-color: var(--card-border) !important;
+}
+
+html.dark input::placeholder,
+.dark input::placeholder {
+  color: var(--muted-foreground) !important;
 }
 
 body {
@@ -97,7 +166,6 @@ body {
     scrollbar-width: none;
   }
 
-  /* Safe area padding for mobile */
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
@@ -106,13 +174,11 @@ body {
     padding-top: env(safe-area-inset-top, 0px);
   }
 
-  /* Focus ring for accessibility */
   .focus-ring:focus {
     outline: none;
     box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--primary);
   }
 
-  /* Reduced motion support */
   @media (prefers-reduced-motion: reduce) {
 
     *,
@@ -124,16 +190,6 @@ body {
     }
   }
 
-  /* High contrast mode support */
-  @media (prefers-contrast: high) {
-    :root {
-      --primary: #FFD700;
-      --foreground: #000000;
-      --background: #ffffff;
-    }
-  }
-
-  /* Shake animation for errors */
   .animate-shake {
     animation: shake 0.5s ease-in-out;
   }
