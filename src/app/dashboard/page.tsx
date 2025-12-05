@@ -222,24 +222,30 @@ export default function ProfilePage() {
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-3xl font-bold">
-                                        {user.name[0]?.toUpperCase() || 'U'}
+                                        {user.name ? user.name[0]?.toUpperCase() : 'З'}
                                     </div>
                                 )}
                             </div>
                         </div>
 
                         {/* User Info */}
-                        <h1 className="text-2xl font-bold text-gray-900 mb-1">{user.name}</h1>
-                        <p className="text-gray-700 font-medium mb-3">{user.phone}</p>
+                        <h1 className="text-2xl font-bold text-gray-900 mb-1">
+                            {user.name || "Зочин"}
+                        </h1>
+                        <p className="text-gray-700 font-medium mb-3">
+                            {user.phone || "Бүртгэлгүй хэрэглэгч"}
+                        </p>
 
-                        {/* Simple Status Badge */}
+                        {/* Status Badge */}
                         {userRole === 'producer' ? (
                             <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-500 text-white shadow-sm">
                                 <span className="text-xs font-bold">✅ Баталгаажсан үйлдвэрлэгч</span>
                             </div>
                         ) : (
                             <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/30 backdrop-blur-sm text-gray-900 border border-white/40 shadow-sm">
-                                <span className="text-xs font-bold">👤 Хэрэглэгч</span>
+                                <span className="text-xs font-bold">
+                                    {user.phone ? "🛍️ Худалдан авагч" : "👤 Зочин"}
+                                </span>
                             </div>
                         )}
                     </div>
