@@ -9,10 +9,17 @@ export function middleware(request: NextRequest) {
     // Default country
     let country = DEFAULT_COUNTRY;
 
-    // Detect country from domain (e.g. .kg domain -> KG)
-    if (hostname.endsWith('.kg') || hostname.includes('kyrgyz')) {
-        country = 'KG';
+    // 1. Check if cookie exists
+    const cookieCountry = request.cookies.get('country')?.value;
+    if (cookieCountry && (cookieCountry === 'MN' || cookieCountry === 'KG')) {
+        country = cookieCountry;
+    } else {
+        // 2. If no cookie, detect from domain
+        if (hostname.endsWith('.kg') || hostname.includes('kyrgyz')) {
+            country = 'KG';
+        }
     }
+
     // You can add more logic here (e.g. query param ?country=KG for testing)
     const url = new URL(request.url);
     if (url.searchParams.has('country')) {
