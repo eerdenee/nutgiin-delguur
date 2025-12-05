@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { ArrowLeft, Camera, MapPin, Loader2, Banknote, Info, Copy, Check, Video, AlertTriangle, Package } from "lucide-react";
+import { ArrowLeft, Camera, MapPin, Loader2, Banknote, Info, Copy, Check, Video, AlertTriangle, Package, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AIMAGS, MOCK_PRODUCTS, CATEGORIES } from "@/lib/data";
 import { getUserSubscription, canPostMoreAds, SUBSCRIPTION_PLANS } from "@/lib/subscription";
+import { validateContent } from "@/lib/blacklist";
 
 // Mongolian banks list
 const BANKS = [
@@ -53,6 +54,7 @@ function PostAdContent() {
     const [subscription, setSubscription] = useState<ReturnType<typeof getUserSubscription> | null>(null);
     const [adLimitInfo, setAdLimitInfo] = useState<ReturnType<typeof canPostMoreAds> | null>(null);
     const [phoneFromAuth, setPhoneFromAuth] = useState<string>("");
+    const [termsAccepted, setTermsAccepted] = useState(false);
 
     // Load subscription info and user phone from Supabase
     useEffect(() => {
@@ -225,6 +227,18 @@ function PostAdContent() {
             return;
         }
 
+        if (!termsAccepted) {
+            alert("Та үйлчилгээний нөхцөлийг зөвшөөрөх шаардлагатай.");
+            return;
+        }
+
+        // Blacklist Validation
+        const validation = validateContent(title, description);
+        if (!validation.isValid) {
+            alert(`Таны зар хориотой үг агуулсан байна: "${validation.foundWords.join(', ')}"\n\nБид хууль бус бараа, садар самуун сурталчилсан зарыг хориглодог.`);
+            return;
+        }
+
         setIsLoading(true);
 
         try {
@@ -317,7 +331,7 @@ function PostAdContent() {
     const selectedAimag = AIMAGS.find(a => a.id === selectedAimagId);
     const soums = selectedAimag?.soums || [];
 
-    const isFormValid = title && price && description && selectedAimagId && (soums.length === 0 || selectedSoumId) && selectedCategory && contactPhone;
+    const isFormValid = title && price && description && selectedAimagId && (soums.length === 0 || selectedSoumId) && selectedCategory && contactPhone && termsAccepted;
 
     return (
         <div className="min-h-screen bg-gray-50 pb-24">
@@ -371,6 +385,7 @@ function PostAdContent() {
                         </Link>
                     </div>
                 </div>
+
             )}
 
             <div className="max-w-lg mx-auto px-4 mt-6">
@@ -717,6 +732,32 @@ function PostAdContent() {
                         </div>
                     </div>
 
+                    {/* Legal Disclaimer */}
+                    <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl">
+                        <div className="flex gap-3">
+                            <div className="shrink-0 mt-0.5">
+                                <ShieldCheck className="w-5 h-5 text-amber-600" />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-amber-900 text-sm mb-1">Хуулийн хариуцлага</h3>
+                                <label className="flex gap-3 items-start cursor-pointer group">
+                                    <div className="relative flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={termsAccepted}
+                                            onChange={(e) => setTermsAccepted(e.target.checked)}
+                                            className="w-5 h-5 border-amber-400 rounded text-amber-600 focus:ring-amber-500 mt-0.5"
+                                        />
+                                    </div>
+                                    <span className="text-sm text-amber-800 leading-relaxed group-hover:text-amber-900 transition-colors">
+                                        Би хууль бус бараа (хар тамхи, зэвсэг, хүний наймаа, садар самуун гэх мэт) сурталчлахгүй гэдгээ баталж байна.
+                                        Зөрчсөн тохиолдолд миний мэдээллийг хуулийн байгууллагад шилжүүлэхийг зөвшөөрч байна.
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Sticky Publish Button */}
                     <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 z-20 md:static md:bg-transparent md:border-0 md:p-0">
                         <div className="max-w-lg mx-auto">
@@ -738,7 +779,7 @@ function PostAdContent() {
                     </div>
                 </form>
             </div>
-        </div>
+        </div >
     );
 }
 

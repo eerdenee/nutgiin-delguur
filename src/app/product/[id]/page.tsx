@@ -4,7 +4,8 @@ import { useState, useEffect, use } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Heart, Phone, MapPin, ShieldAlert, MessageCircle, CheckCircle, Copy, Check, AlertTriangle, Banknote, Video, Play } from "lucide-react";
+import { ArrowLeft, Heart, Phone, MapPin, ShieldAlert, MessageCircle, CheckCircle, Copy, Check, AlertTriangle, Banknote, Video, Play, Flag } from "lucide-react";
+import ReportModal from "@/components/ReportModal";
 import { MOCK_PRODUCTS } from "@/lib/data";
 import ReviewSection from "@/components/ReviewSection";
 import { formatPrice, getSmartBadge } from "@/lib/utils";
@@ -29,6 +30,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     const [showPaymentWarning, setShowPaymentWarning] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
+    const [showReportModal, setShowReportModal] = useState(false);
 
     const router = useRouter();
 
@@ -254,6 +256,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
     return (
         <div className="min-h-screen bg-white pb-24">
+            <ReportModal
+                productId={id}
+                isOpen={showReportModal}
+                onClose={() => setShowReportModal(false)}
+            />
             {/* Payment Warning Modal */}
             {showPaymentWarning && (
                 <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4" onClick={() => setShowPaymentWarning(false)}>
@@ -564,6 +571,16 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                 Худалдагчтай сайтар ярилцаж, тохиролцсоны дараа л мөнгөө шилжүүлнэ үү. Боломжтой бол барааг биетээр үзээрэй.
                             </p>
                         </div>
+                    </div>
+
+                    <div className="flex justify-end mb-8 -mt-6">
+                        <button
+                            onClick={() => setShowReportModal(true)}
+                            className="flex items-center gap-2 text-gray-400 hover:text-red-500 text-xs font-medium transition-colors"
+                        >
+                            <Flag className="w-4 h-4" />
+                            Зар мэдээлэх
+                        </button>
                     </div>
 
                     {/* Review Section */}
