@@ -31,7 +31,7 @@ export default function LoginPage() {
                 return;
             }
 
-            if (data.user) {
+            if (data?.user) {
                 // Get profile to sync with localStorage
                 const profile: any = await getCurrentProfile();
 

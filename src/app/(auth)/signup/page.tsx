@@ -53,7 +53,7 @@ export default function SignupPage() {
                 return;
             }
 
-            if (data.user) {
+            if (data?.user) {
                 // Save basic info to localStorage for backward compatibility/UI sync
                 localStorage.setItem("userProfile", JSON.stringify({
                     name: formData.name,

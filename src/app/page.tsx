@@ -91,7 +91,9 @@ function HomeContent() {
           setProducts([...transformedProducts, ...MOCK_PRODUCTS]);
         }
       } catch (err) {
-        console.error('Error loading products:', err);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Error loading products:', err);
+        }
       } finally {
         setIsLoadingProducts(false);
       }
