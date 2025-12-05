@@ -184,6 +184,32 @@ export default function SignupPage() {
                     </div>
                 </form>
 
+                <div className="relative my-6">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-200"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                        <span className="px-2 bg-white text-gray-500">Эсвэл</span>
+                    </div>
+                </div>
+
+                <button
+                    type="button"
+                    onClick={async () => {
+                        const { supabase } = await import("@/lib/supabase");
+                        await supabase.auth.signInWithOAuth({
+                            provider: 'google',
+                            options: {
+                                redirectTo: `${window.location.origin}/auth/callback`
+                            }
+                        });
+                    }}
+                    className="w-full bg-white border border-gray-200 text-gray-700 font-bold py-3.5 rounded-xl hover:bg-gray-50 transition-all flex items-center justify-center gap-3"
+                >
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-6 h-6" alt="Google" />
+                    Google-ээр бүртгүүлэх
+                </button>
+
                 <div className="mt-auto pt-6 text-center">
                     <p className="text-gray-600">
                         Бүртгэлтэй юу?{" "}

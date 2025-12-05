@@ -8,7 +8,7 @@ import { getUserSubscription, canPostMoreAds, SUBSCRIPTION_PLANS } from "@/lib/s
 import { useCountry } from "@/context/CountryContext";
 
 export default function ProfilePage() {
-    const { t, country } = useCountry();
+    const { t, country, setCountry } = useCountry();
     const [showTooltip, setShowTooltip] = useState(false);
     const [user, setUser] = useState({
         name: "",
@@ -241,10 +241,10 @@ export default function ProfilePage() {
 
                         {/* User Info */}
                         <h1 className="text-2xl font-bold text-gray-900 mb-1">
-                            {user.name || t.dashboard.guest}
+                            {user.name || t.dashboard.welcome}
                         </h1>
                         <p className="text-gray-700 font-medium mb-3">
-                            {user.phone || t.dashboard.guest}
+                            {user.phone || "Нутгийн Дэлгүүр"}
                         </p>
 
                         {/* Status Badge */}
@@ -257,6 +257,24 @@ export default function ProfilePage() {
                                 <span className="text-xs font-bold">
                                     {user.phone ? `🛍️ ${t.dashboard.buyer}` : `👤 ${t.dashboard.guest}`}
                                 </span>
+                            </div>
+                        )}
+
+                        {/* Admin Country Switcher */}
+                        {isAdmin && (
+                            <div className="mt-4 flex items-center gap-2 bg-white/20 backdrop-blur-md p-1 rounded-lg border border-white/30">
+                                <button
+                                    onClick={() => setCountry('MN')}
+                                    className={`px-3 py-1 rounded-md text-sm font-bold transition-colors ${country.code === 'MN' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-800 hover:bg-white/10'}`}
+                                >
+                                    🇲🇳 MN
+                                </button>
+                                <button
+                                    onClick={() => setCountry('KG')}
+                                    className={`px-3 py-1 rounded-md text-sm font-bold transition-colors ${country.code === 'KG' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-800 hover:bg-white/10'}`}
+                                >
+                                    🇰🇬 KG
+                                </button>
                             </div>
                         )}
                     </div>
