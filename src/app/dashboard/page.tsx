@@ -49,6 +49,12 @@ export default function ProfilePage() {
                     const profile = await getCurrentProfile();
 
                     if (profile) {
+                        // Check if role is admin directly from DB
+                        if (profile.role === 'admin') {
+                            setIsAdmin(true);
+                            setUserRole('admin');
+                        }
+
                         setUser({
                             name: profile.name || authUser.user_metadata.full_name || authUser.email?.split('@')[0] || "Хэрэглэгч",
                             phone: profile.phone || "",
@@ -64,6 +70,11 @@ export default function ProfilePage() {
                             phone: profile.phone,
                             avatar: profile.avatar_url || authUser.user_metadata.avatar_url
                         }));
+
+                        // Save role to localStorage
+                        if (profile.role) {
+                            localStorage.setItem("userRole", profile.role);
+                        }
                     } else {
                         // Fallback to Auth metadata if profile doesn't exist yet
                         setUser({
