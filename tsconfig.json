@@ -73,6 +73,10 @@
     "src/lib/fairDiscovery.ts",
     "src/lib/ghostAds.ts",
     "src/lib/interactionLogs.ts",
-    "src/lib/probabilisticCounting.ts"
+    "src/lib/probabilisticCounting.ts",
+    "src/lib/priceLogic.ts",
+    "src/lib/rateLimit.ts",
+    "src/lib/moderation.ts",
+    "src/lib/verificationSystem.ts"
   ]
 }
