@@ -37,7 +37,7 @@ export async function getActivityFeed(limit: number = 10): Promise<ActivityFeedI
         .order('created_at', { ascending: false })
         .limit(5);
 
-    for (const listing of recentListings || []) {
+    for (const listing of (recentListings as any[]) || []) {
         const location = listing.location_soum || listing.location_aimag;
         activities.push({
             id: `listing_${now}_${Math.random()}`,
@@ -56,7 +56,7 @@ export async function getActivityFeed(limit: number = 10): Promise<ActivityFeedI
         .order('created_at', { ascending: false })
         .limit(3);
 
-    for (const user of recentUsers || []) {
+    for (const user of (recentUsers as any[]) || []) {
         activities.push({
             id: `user_${now}_${Math.random()}`,
             type: 'join',
