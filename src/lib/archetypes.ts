@@ -68,7 +68,8 @@ export async function getActivityFeed(limit: number = 10): Promise<ActivityFeedI
     }
 
     // Simulated live viewing activity (creates buzz)
-    const { count: activeViewers } = await supabase
+    // Cast to any to avoid 'never' type error if table inference fails
+    const { count: activeViewers } = await (supabase as any)
         .from('products')
         .select('*', { count: 'exact' })
         .eq('status', 'active');
@@ -105,7 +106,7 @@ export async function getLiveStats(): Promise<{
             .from('products')
             .select('*', { count: 'exact' })
             .gte('created_at', today),
-        supabase
+        (supabase as any)
             .from('verified_transactions')
             .select('*', { count: 'exact' })
             .gte('created_at', today)
@@ -255,7 +256,7 @@ export async function getDailyTreasure(userId: string): Promise<{
 } | null> {
     // Check if user already saw today's treasure
     const today = new Date().toISOString().split('T')[0];
-    const { data: seen } = await supabase
+    const { data: seen } = await (supabase as any)
         .from('treasure_views')
         .select('*')
         .eq('user_id', userId)
@@ -279,7 +280,7 @@ export async function getDailyTreasure(userId: string): Promise<{
     const randomItem = (products as any[])[Math.floor(Math.random() * products.length)];
 
     // Record view
-    await supabase.from('treasure_views').insert({
+    await (supabase as any).from('treasure_views').insert({
         user_id: userId,
         product_id: randomItem.id,
         product_data: randomItem,
@@ -398,7 +399,7 @@ export async function createCommunityAnnouncement(
             ? `⚠️ Дүрэм зөрчсөн хэрэглэгчид сануулга өгөгдлөө`
             : `📢 ${details.reason}`;
 
-    await supabase.from('community_announcements').insert({
+    await (supabase as any).from('community_announcements').insert({
         type: action,
         message,
         target_user_id: details.targetUserId,
@@ -422,7 +423,7 @@ export async function getCommunityTrustScore(userId: string): Promise<{
     ] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', userId).single(),
         supabase.from('reports').select('*', { count: 'exact' }).eq('reported_user_id', userId),
-        supabase.from('seller_endorsements').select('*', { count: 'exact' }).eq('seller_id', userId)
+        (supabase as any).from('seller_endorsements').select('*', { count: 'exact' }).eq('seller_id', userId)
     ]);
 
     const profile = profileData as any;
