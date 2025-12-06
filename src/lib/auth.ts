@@ -124,12 +124,13 @@ export const isAuthenticated = async (): Promise<boolean> => {
 
 /**
  * Super Admin Emails
- * Add your email here to get admin access
+ * Set via SUPER_ADMIN_EMAILS env var (comma-separated)
+ * Falls back to default admin emails
  */
-export const SUPER_ADMIN_EMAILS = [
-    'eerdenee320@gmail.com', // User's email
-    'admin@nutgiindelguur.mn'
-];
+export const SUPER_ADMIN_EMAILS: string[] = (
+    process.env.NEXT_PUBLIC_SUPER_ADMIN_EMAILS ||
+    'eerdenee320@gmail.com,admin@nutgiindelguur.mn'
+).split(',').map(email => email.trim().toLowerCase());
 
 /**
  * Check if current user is Super Admin
@@ -140,7 +141,7 @@ export const isSuperAdmin = async (): Promise<boolean> => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user || !user.email) return false;
 
-        if (SUPER_ADMIN_EMAILS.includes(user.email)) return true;
+        if (SUPER_ADMIN_EMAILS.includes(user.email.toLowerCase())) return true;
 
         // 2. Check Profile Role from DB
         const { data: profile } = await (supabase
