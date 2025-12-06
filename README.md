@@ -1,36 +1,287 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🇲🇳 Нутгийн Дэлгүүр - Nutgiin Delguur
 
-## Getting Started
+**Монголын үндэсний үйлдвэрлэгчдийн дэлхийд түгээх платформ**
 
-First, run the development server:
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16.x-black)](https://nextjs.org/)
+[![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black)](https://vercel.com)
+
+---
+
+## 📖 Тойм (Overview)
+
+**Нутгийн Дэлгүүр** нь Монгол орны 21 аймаг, 330+ сум/тосгоны үндэсний үйлдвэрлэгчдийг шууд худалдан авагчидтай холбож, орон нутгийн эдийн засгийг бэхжүүлэх зорилготой Next.js дээр суурилсан модерн вэб платформ юм.
+
+### ✨ Онцлог Шинж Чанарууд
+
+- 🗺️ **330+ Байршил** - 21 аймаг, 330+ сум/тосгоны иргэд бараагаа зарж чадна
+- 📦 **15 Категори** - Хүнс, гар урлал, тариалан гэх мэт
+- 🔒 **Аюулгүй** - 7-layer security, content moderation
+- 🌙 **Dark Mode** - CSS variables ашигласан systemic dark theme
+- 🌍 **i18n** - Монгол 🇲🇳 + Киргиз 🇰🇬 дэмжлэг
+- 📱 **PWA** - Offline дэмжлэг бүхий Progressive Web App
+- ⚡ **Performance** - Next.js 16 + React 19 + TypeScript 5
+- 📊 **Real-time** - Supabase Realtime messaging
+
+---
+
+## 🚀 Эхлэх (Quick Start)
+
+### Prerequisites
+
+- Node.js 20+ эсвэл 22+
+- npm, yarn эсвэл pnpm
+- Supabase Project
+- Cloudflare R2 Account (images)
+
+### 1. Repository Clone
+
+```bash
+git clone https://github.com/eerdenee/nutgiin-delguur.git
+cd nutgiin-delguur
+```
+
+### 2. Dependencies Install
+
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+```
+
+### 3. Environment Variables
+
+`.env.local` файл үүсгээд дараах утгуудыг бөглө:
+
+```bash
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+# Cloudflare R2 (for production images)
+R2_ACCOUNT_ID=your_r2_account_id
+R2_ACCESS_KEY_ID=your_r2_access_key
+R2_SECRET_ACCESS_KEY=your_r2_secret_key
+R2_BUCKET_NAME=your_bucket_name
+NEXT_PUBLIC_R2_PUBLIC_URL=https://your-r2-public-url.com
+
+# Sentry (optional - error tracking)
+NEXT_PUBLIC_SENTRY_DSN=your_sentry_dsn
+SENTRY_ORG=your_org
+SENTRY_PROJECT=your_project
+
+# Super Admin Emails (comma-separated)
+NEXT_PUBLIC_SUPER_ADMIN_EMAILS=your@email.com
+
+# Site URL (for metadata)
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
+
+Дэлгэрэнгүй: [`ENV_SETUP.md`](./ENV_SETUP.md)
+
+### 4. Database Setup
+
+Supabase Studio дээр [`supabase/schema.sql`](./supabase/schema.sql) ажиллуулаад migration файлуудыг импортлоорой:
+
+```bash
+# supabase/migrations/ folder-д байгаа бүх .sql файлуудыг дарааллаар
+```
+
+### 5. Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Браузер дээр [http://localhost:3000](http://localhost:3000) нээнэ.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🏗️ Project Structure
 
-## Learn More
+```
+nutgiin-delguur/
+├── src/
+│   ├── app/                    # Next.js App Router
+│   │   ├── (auth)/            # Auth group routes
+│   │   ├── admin/             # Admin dashboard
+│   │   ├── dashboard/         # User dashboard
+│   │   ├── messages/          # Chat system
+│   │   ├── product/           # Product pages
+│   │   ├── api/               # API routes
+│   │   └── ...
+│   ├── components/            # Reusable UI components
+│   ├── lib/                   # Business logic & utilities
+│   │   ├── auth.ts           # Authentication
+│   │   ├── products.ts       # Product CRUD
+│   │   ├── moderation.ts     # Content moderation
+│   │   └── ...
+│   ├── hooks/                # Custom React hooks
+│   ├── context/              # React Context providers
+│   └── locales/              # i18n JSON files
+├── supabase/
+│   ├── schema.sql            # Database schema
+│   └── migrations/           # SQL migrations
+├── public/
+│   ├── site.webmanifest      # PWA manifest
+│   ├── sw.js                 # Service Worker
+│   └── icons...
+└── ...config files
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 💡 Core Features
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 🔐 Authentication
+- Phone-based auth (via email pattern for Supabase Free tier)
+- Google OAuth support
+- Session management
+- Role-based access (buyer, producer, admin)
 
-## Deploy on Vercel
+### 📦 Product Management
+- CRUD operations with Supabase RLS
+- Image upload to Cloudflare R2
+- Magic bytes validation
+- 3-tier visibility system (Soum → Aimag → National)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 💬 Real-time Messaging
+- Supabase Realtime subscriptions
+- Direct chat between buyers and sellers
+- Read receipts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 🛡️ Trust & Safety
+- Content moderation with blacklist keywords
+- Community reporting system
+- User verification
+- Admin moderation panel
+
+### 💳 Subscription Plans
+| Tier | Price | Ads/Month | Duration |
+|------|-------|-----------|----------|
+| 🆓 ЭХЛЭЛ | ₮0 | 3 | 7 days |
+| 💪 ИДЭВХТЭЙ | ₮9,900 | 10 | 14 days |
+| 🏢 БИЗНЕС | ₮49,000 | 100 | 30 days |
+
+---
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm test -- --watch
+
+# Run tests with coverage
+npm test -- --coverage
+```
+
+Current test coverage: ~15% (auth, subscription modules)
+
+---
+
+## 📊 Tech Stack
+
+| Layer | Technology | Version |
+|-------|------------|---------|
+| **Framework** | Next.js | 16.0.7 |
+| **UI Library** | React | 19.2.0 |
+| **Styling** | Tailwind CSS | 4.x |
+| **Language** | TypeScript | 5.x |
+| **Database** | Supabase/PostgreSQL | Latest |
+| **Auth** | Supabase Auth | Latest |
+| **Storage** | Cloudflare R2 | Latest |
+| **Monitoring** | Sentry | 10.x |
+| **Icons** | Lucide React | 0.555 |
+| **Testing** | Jest + React Testing Library | Latest |
+
+---
+
+## 🛠️ Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm start` | Start production server |
+| `npm test` | Run tests |
+| `npm run lint` | Run ESLint |
+
+---
+
+## 📝 Documentation
+
+- [Env Setup Guide](./ENV_SETUP.md)
+- [Audit Reports](./ENTROPY_AUDIT_REPORT.md) - 7-level comprehensive analysis
+- [Database Schema](./supabase/schema.sql)
+
+---
+
+## 🌍 Deployment
+
+### Vercel (Recommended)
+
+1. Push code to GitHub
+2. Connect repository to Vercel
+3. Add environment variables
+4. Deploy!
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/eerdenee/nutgiin-delguur)
+
+### Manual Deployment
+
+```bash
+npm run build
+npm start
+```
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m '✨ Add AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License.
+
+---
+
+## 👤 Author
+
+**Eerdenee**
+- Email: eerdenee320@gmail.com
+- GitHub: [@eerdenee](https://github.com/eerdenee)
+
+---
+
+## 🙏 Acknowledgments
+
+- [Next.js](https://nextjs.org/) - The React Framework
+- [Supabase](https://supabase.com/) - Open source Firebase alternative
+- [Cloudflare R2](https://www.cloudflare.com/products/r2/) - Object storage
+- [Vercel](https://vercel.com/) - Deployment platform
+- [Lucide](https://lucide.dev/) - Beautiful icons
+
+---
+
+<div align="center">
+
+**🇲🇳 Нутгийн Дэлгүүр - Монголын үйлдвэрлэлийг дэлхийд түгээнэ 🇲🇳**
+
+Made with ❤️ in Mongolia
+
+</div>
