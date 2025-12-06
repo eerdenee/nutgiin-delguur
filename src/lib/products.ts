@@ -72,7 +72,17 @@ export async function createProduct(input: ProductInput): Promise<{ data: Produc
 
         // Sanitize inputs
         const sanitizedTitle = input.title.replace(/<[^>]*>/g, '').trim().slice(0, 200);
-        const sanitizedDescription = input.description?.replace(/<[^>]*>/g, '').trim().slice(0, 2000);
+
+        // ✅ Validate description length
+        const MAX_DESCRIPTION_LENGTH = 5000;
+        if (input.description && input.description.length > MAX_DESCRIPTION_LENGTH) {
+            return {
+                data: null,
+                error: `Тайлбар хэт урт байна. Хамгийн ихдээ ${MAX_DESCRIPTION_LENGTH} тэмдэгт байх ёстой.`
+            };
+        }
+
+        const sanitizedDescription = input.description?.replace(/<[^>]*>/g, '').trim().slice(0, MAX_DESCRIPTION_LENGTH);
 
         const insertData = {
             user_id: user.id,
@@ -108,9 +118,6 @@ export async function createProduct(input: ProductInput): Promise<{ data: Produc
     }
 }
 
-/**
- * Get products with filters
- */
 export async function getProducts(options?: {
     category?: string;
     aimag?: string;
@@ -121,9 +128,19 @@ export async function getProducts(options?: {
     sortBy?: 'newest' | 'price_asc' | 'price_desc' | 'popular';
 }): Promise<{ data: Product[]; error: string | null }> {
     try {
+        // ✅ OPTIMIZED: Use JOIN to fetch seller info in single query
         let query = (supabase
             .from('products') as any)
-            .select('*')
+            .select(`
+                *,
+                seller:profiles!products_user_id_fkey (
+                    id,
+                    name,
+                    phone,
+                    avatar_url,
+                    is_verified
+                )
+            `)
             .eq('status', 'active');
 
         // Category filter
@@ -170,32 +187,15 @@ export async function getProducts(options?: {
         const { data, error } = await query;
 
         if (error) {
-            console.error('Get products error:', error);
+            console.error('[getProducts] Database error:', error);
             return { data: [], error: error.message };
         }
 
-        // Fetch seller info for each product
-        if (data && data.length > 0) {
-            const userIds = [...new Set(data.map((p: any) => p.user_id))];
-            const { data: profiles } = await (supabase
-                .from('profiles') as any)
-                .select('id, name, phone, avatar_url, is_verified')
-                .in('id', userIds);
-
-            const profileMap = new Map(profiles?.map((p: any) => [p.id, p]) || []);
-
-            const productsWithSeller = data.map((p: any) => ({
-                ...p,
-                seller: profileMap.get(p.user_id) || null
-            }));
-
-            return { data: productsWithSeller, error: null };
-        }
-
+        // Data already includes seller info from JOIN
         return { data: data || [], error: null };
     } catch (err) {
-        console.error('Get products exception:', err);
-        return { data: [], error: 'Алдаа гарлаа' };
+        console.error('[getProducts] Exception:', err);
+        return { data: [], error: 'Бараа ачаалахад алдаа гарлаа. Дахин оролдоно уу.' };
     }
 }
 
