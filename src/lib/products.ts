@@ -245,7 +245,7 @@ export async function getMyProducts(): Promise<{ data: Product[]; error: string 
             return { data: [], error: error.message };
         }
 
-        return { data: data || [], error: null };
+        return { data: (data as any[]) || [], error: null };
     } catch (err) {
         return { data: [], error: 'Алдаа гарлаа' };
     }
