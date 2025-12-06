@@ -240,6 +240,7 @@ Full transparency of the system's evolution through 14 Levels of Enlightenment:
 15. [The Absolute (Axioms)](./THE_ABSOLUTE_AUDIT_REPORT.md)
 16. [The Null (Cleanliness)](./THE_NULL_AUDIT_REPORT.md)
 17. [The Legacy (History)](./LEGACY.md)
+18. [The Recursion (Infinite)](./THE_RECURSION_AUDIT_REPORT.md)
 
 ---
 
