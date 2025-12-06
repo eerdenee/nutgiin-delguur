@@ -18,7 +18,7 @@ export function Skeleton({
     height,
     animation = "pulse",
 }: SkeletonProps) {
-    const baseStyles = "bg-gray-200 dark:bg-gray-700";
+    const baseStyles = "bg-[var(--card-border)]";
 
     const animationStyles = {
         pulse: "animate-pulse",

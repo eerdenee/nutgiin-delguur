@@ -128,6 +128,51 @@ html.dark input::placeholder,
   color: var(--muted-foreground) !important;
 }
 
+/* Additional dark mode overrides */
+html.dark textarea,
+.dark textarea {
+  background-color: var(--input-bg) !important;
+  color: var(--foreground) !important;
+  border-color: var(--card-border) !important;
+}
+
+html.dark select,
+.dark select {
+  background-color: var(--input-bg) !important;
+  color: var(--foreground) !important;
+  border-color: var(--card-border) !important;
+}
+
+html.dark .border-b,
+.dark .border-b {
+  border-color: var(--card-border) !important;
+}
+
+html.dark .border-t,
+.dark .border-t {
+  border-color: var(--card-border) !important;
+}
+
+html.dark .divide-gray-100>*+*,
+.dark .divide-gray-100>*+* {
+  border-color: var(--card-border) !important;
+}
+
+html.dark .shadow-sm,
+.dark .shadow-sm {
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.3) !important;
+}
+
+html.dark .hover\:bg-gray-50:hover,
+.dark .hover\:bg-gray-50:hover {
+  background-color: var(--card-border) !important;
+}
+
+html.dark .hover\:bg-gray-100:hover,
+.dark .hover\:bg-gray-100:hover {
+  background-color: var(--card-border) !important;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);

@@ -56,7 +56,7 @@ export default function ThemeToggle() {
     return (
         <button
             onClick={toggleTheme}
-            className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            className="p-2 rounded-full bg-[var(--background)] hover:bg-[var(--card-border)] transition-colors"
             aria-label={`Горим солих: ${labels[theme]}`}
             title={labels[theme]}
         >
