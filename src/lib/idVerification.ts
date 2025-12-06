@@ -3,9 +3,13 @@
  * 
  * Purpose: Automatically delete sensitive ID card images after verification
  * Legal Requirement: "Хүний хувийн мэдээлэл хамгаалах хууль"
+ * 
+ * IMPORTANT: We store SHA-256 hash of ID images as cryptographic proof
+ * that verification happened, even after the image is deleted.
  */
 
 import { supabase } from './supabase';
+import crypto from 'crypto';
 
 const VERIFICATION_EXPIRY_HOURS = 24; // 24 цагийн дараа устгах
 
@@ -51,6 +55,7 @@ export async function scheduleIdImageDeletion(
 
 /**
  * Cron job: Delete expired ID images (run every hour)
+ * IMPORTANT: Computes SHA-256 hash before deletion as legal proof
  */
 export async function cleanupExpiredIdImages(): Promise<{ deleted: number; errors: number }> {
     let deleted = 0;
@@ -67,17 +72,27 @@ export async function cleanupExpiredIdImages(): Promise<{ deleted: number; error
         return { deleted: 0, errors: 1 };
     }
 
-    // 2. Delete each image from R2
+    // 2. Delete each image from R2 (with hash preservation)
     for (const record of records) {
         try {
-            // Delete from R2
+            // 2a. Download image from R2 to compute hash
+            const imageBuffer = await downloadFromR2(record.id_card_image_key);
+
+            // 2b. Compute SHA-256 hash (CRYPTOGRAPHIC PROOF)
+            const imageHash = crypto
+                .createHash('sha256')
+                .update(imageBuffer)
+                .digest('hex');
+
+            // 2c. Delete from R2
             await deleteFromR2(record.id_card_image_key);
 
-            // Update record - remove image reference
+            // 2d. Update record - store hash, remove image reference
             await supabase
                 .from('id_verifications')
                 .update({
                     id_card_image_key: null,
+                    image_hash_sha256: imageHash, // PROOF: "Энэ хүн шалгагдсан"
                     image_deleted_at: new Date().toISOString()
                 })
                 .eq('id', record.id);
@@ -86,10 +101,10 @@ export async function cleanupExpiredIdImages(): Promise<{ deleted: number; error
 
             // Compliance log
             await logComplianceAction({
-                action: 'DELETE_ID_IMAGE',
+                action: 'DELETE_ID_IMAGE_WITH_HASH',
                 userId: record.user_id,
                 imageKey: record.id_card_image_key,
-                reason: 'Automatic cleanup after verification expiry'
+                reason: `Hash preserved: ${imageHash.substring(0, 16)}...`
             });
 
         } catch (err) {
@@ -101,6 +116,35 @@ export async function cleanupExpiredIdImages(): Promise<{ deleted: number; error
     }
 
     return { deleted, errors };
+}
+
+/**
+ * Download file from R2 (to compute hash before deletion)
+ */
+async function downloadFromR2(key: string): Promise<Buffer> {
+    const { S3Client, GetObjectCommand } = await import('@aws-sdk/client-s3');
+
+    const client = new S3Client({
+        region: 'auto',
+        endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+        credentials: {
+            accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+            secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+        }
+    });
+
+    const response = await client.send(new GetObjectCommand({
+        Bucket: process.env.R2_BUCKET_NAME,
+        Key: key
+    }));
+
+    // Convert stream to buffer
+    const chunks: Uint8Array[] = [];
+    const stream = response.Body as AsyncIterable<Uint8Array>;
+    for await (const chunk of stream) {
+        chunks.push(chunk);
+    }
+    return Buffer.concat(chunks);
 }
 
 /**
