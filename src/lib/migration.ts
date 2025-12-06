@@ -57,7 +57,9 @@ export const migrateData = async () => {
         return { success: true, migratedAds: migratedAdsCount };
 
     } catch (error) {
-        console.error('Migration error:', error);
+        if (process.env.NODE_ENV === 'development') {
+            console.error('Migration error:', error);
+        }
         return { success: false, error };
     }
 };

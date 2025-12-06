@@ -187,14 +187,18 @@ export async function getProducts(options?: {
         const { data, error } = await query;
 
         if (error) {
-            console.error('[getProducts] Database error:', error);
+            if (process.env.NODE_ENV === 'development') {
+                console.error('[getProducts] Database error:', error);
+            }
             return { data: [], error: error.message };
         }
 
         // Data already includes seller info from JOIN
         return { data: data || [], error: null };
     } catch (err) {
-        console.error('[getProducts] Exception:', err);
+        if (process.env.NODE_ENV === 'development') {
+            console.error('[getProducts] Exception:', err);
+        }
         return { data: [], error: 'Бараа ачаалахад алдаа гарлаа. Дахин оролдоно уу.' };
     }
 }

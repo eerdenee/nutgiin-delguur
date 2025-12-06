@@ -250,14 +250,18 @@ export function submitAppeal(
 
     // Хугацаа шалгах
     if (new Date() > new Date(record.appealDeadline)) {
-        console.error('Appeal deadline passed');
+        if (process.env.NODE_ENV === 'development') {
+            console.error('Appeal deadline passed');
+        }
         return null;
     }
 
     // Appeal зөвшөөрөгдсөн эсэх
     const rule = VIOLATION_RULES[record.violationType as ViolationType];
     if (!rule.appealAllowed) {
-        console.error('Appeals not allowed for this violation type');
+        if (process.env.NODE_ENV === 'development') {
+            console.error('Appeals not allowed for this violation type');
+        }
         return null;
     }
 
