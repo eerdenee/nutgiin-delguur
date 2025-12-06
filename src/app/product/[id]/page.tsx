@@ -260,6 +260,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 productId={id}
                 isOpen={showReportModal}
                 onClose={() => setShowReportModal(false)}
+                onReportSuccess={() => { }}
             />
             {/* Payment Warning Modal */}
             {showPaymentWarning && (
