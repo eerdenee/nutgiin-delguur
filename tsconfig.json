@@ -57,6 +57,22 @@
     "src/lib/vibeManagement.ts",
     "src/lib/verifiedReviews.ts",
     "src/lib/atomicTransactions.ts",
-    "src/lib/idVerification.ts"
+    "src/lib/idVerification.ts",
+    "src/lib/facebookSymbiote.ts",
+    "src/lib/algorithmicFairness.ts",
+    "src/lib/algorithmicShuffle.ts",
+    "src/lib/fourPillars.ts",
+    "src/lib/localDrafts.ts",
+    "src/lib/platformAgnostic.ts",
+    "src/lib/qualityFloor.ts",
+    "src/lib/safetyNudges.ts",
+    "src/lib/seoArchival.ts",
+    "src/lib/sentimentShield.ts",
+    "src/lib/dynamicScarcity.ts",
+    "src/lib/engagementScore.ts",
+    "src/lib/fairDiscovery.ts",
+    "src/lib/ghostAds.ts",
+    "src/lib/interactionLogs.ts",
+    "src/lib/probabilisticCounting.ts"
   ]
 }
