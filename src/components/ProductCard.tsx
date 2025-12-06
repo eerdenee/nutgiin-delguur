@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Phone, MapPin, Heart, CheckCircle, Star, MessageCircle, Flag, AlertTriangle, X } from "lucide-react";
-import { reportProduct, hasUserReported, REPORT_REASONS, type ReportReason } from "@/lib/moderation";
+import { Phone, MapPin, Heart, CheckCircle, Star, MessageCircle, Flag } from "lucide-react";
+import { hasUserReported } from "@/lib/moderation";
+import ReportModal from "./ReportModal";
 
 interface ProductCardProps {
     id: string;
@@ -49,10 +50,6 @@ export default function ProductCard({
     const router = useRouter();
     const [isLiked, setIsLiked] = useState(false);
     const [showReportModal, setShowReportModal] = useState(false);
-    const [selectedReason, setSelectedReason] = useState<ReportReason | ''>('');
-    const [reportDescription, setReportDescription] = useState('');
-    const [reportStatus, setReportStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-    const [reportMessage, setReportMessage] = useState('');
     const [alreadyReported, setAlreadyReported] = useState(false);
 
     // Check if user already reported
@@ -129,28 +126,6 @@ export default function ProductCard({
         e.stopPropagation();
         if (!alreadyReported) {
             setShowReportModal(true);
-        }
-    };
-
-    const submitReport = () => {
-        if (!selectedReason) return;
-
-        setReportStatus('loading');
-        const result = reportProduct(id, selectedReason, reportDescription);
-
-        if (result.success) {
-            setReportStatus('success');
-            setReportMessage(result.message);
-            setAlreadyReported(true);
-            setTimeout(() => {
-                setShowReportModal(false);
-                setReportStatus('idle');
-                setSelectedReason('');
-                setReportDescription('');
-            }, 2000);
-        } else {
-            setReportStatus('error');
-            setReportMessage(result.message);
         }
     };
 
@@ -391,119 +366,12 @@ export default function ProductCard({
             </Link >
 
             {/* Report Modal */}
-            {
-                showReportModal && (
-                    <div
-                        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-                        onClick={(e) => { e.stopPropagation(); setShowReportModal(false); }}
-                    >
-                        <div
-                            className="bg-white rounded-2xl w-full max-w-md overflow-hidden"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            {reportStatus === 'success' ? (
-                                <div className="p-8 text-center">
-                                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <CheckCircle className="w-8 h-8 text-green-500" />
-                                    </div>
-                                    <h3 className="font-bold text-lg text-gray-900 mb-2">Баярлалаа!</h3>
-                                    <p className="text-gray-600">{reportMessage}</p>
-                                </div>
-                            ) : (
-                                <>
-                                    <div className="p-4 border-b flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <Flag className="w-5 h-5 text-orange-500" />
-                                            <h2 className="font-bold text-lg">Бүтээгдэхүүн мэдээлэх</h2>
-                                        </div>
-                                        <button
-                                            onClick={() => setShowReportModal(false)}
-                                            aria-label="Close report modal"
-                                            className="p-1 hover:bg-gray-100 rounded-full"
-                                        >
-                                            <X className="w-5 h-5" />
-                                        </button>
-                                    </div>
-
-                                    <div className="p-4 space-y-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Шалтгаан сонгох *
-                                            </label>
-                                            <div className="grid grid-cols-2 gap-2">
-                                                {Object.entries(REPORT_REASONS).map(([key, value]) => (
-                                                    <button
-                                                        key={key}
-                                                        onClick={() => setSelectedReason(key as ReportReason)}
-                                                        className={`p-3 rounded-xl text-sm font-medium transition-all border ${selectedReason === key
-                                                            ? 'bg-orange-50 border-orange-500 text-orange-700'
-                                                            : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
-                                                            }`}
-                                                    >
-                                                        {value.labelMn}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Нэмэлт тайлбар (заавал биш)
-                                            </label>
-                                            <textarea
-                                                value={reportDescription}
-                                                onChange={(e) => setReportDescription(e.target.value)}
-                                                className="w-full p-3 border rounded-xl h-20 resize-none text-sm"
-                                                placeholder="Дэлгэрэнгүй тайлбар бичих..."
-                                            />
-                                        </div>
-
-                                        {reportStatus === 'error' && (
-                                            <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex gap-2">
-                                                <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                                                <p className="text-sm text-red-700">{reportMessage}</p>
-                                            </div>
-                                        )}
-
-                                        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3">
-                                            <p className="text-xs text-yellow-800">
-                                                <strong>⚠️ Анхааруулга:</strong> 15+ хүн мэдээлвэл бүтээгдэхүүн автоматаар нуугдана.
-                                                Худал мэдээлэл өгвөл таны аккаунтад хязгаарлалт тавигдаж болно.
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div className="p-4 border-t flex gap-2">
-                                        <button
-                                            onClick={() => setShowReportModal(false)}
-                                            className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold"
-                                        >
-                                            Болих
-                                        </button>
-                                        <button
-                                            onClick={submitReport}
-                                            disabled={!selectedReason || reportStatus === 'loading'}
-                                            className="flex-1 py-3 bg-orange-500 text-white rounded-xl font-bold disabled:opacity-50 flex items-center justify-center gap-2"
-                                        >
-                                            {reportStatus === 'loading' ? (
-                                                <>
-                                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                                    Илгээж байна...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Flag className="w-4 h-4" />
-                                                    Мэдээлэх
-                                                </>
-                                            )}
-                                        </button>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                )
-            }
+            <ReportModal
+                productId={id}
+                isOpen={showReportModal}
+                onClose={() => setShowReportModal(false)}
+                onReportSuccess={() => setAlreadyReported(true)}
+            />
         </>
     );
 }

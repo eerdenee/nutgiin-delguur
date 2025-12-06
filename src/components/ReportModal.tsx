@@ -1,135 +1,162 @@
-
 "use client";
 
 import { useState } from "react";
-import { Flag, AlertTriangle, X, Loader2 } from "lucide-react";
-import { reportProduct } from "@/app/actions/moderation";
+import { Flag, AlertTriangle, X, CheckCircle } from "lucide-react";
+import { reportProduct, REPORT_REASONS, type ReportReason } from "@/lib/moderation";
 
 interface ReportModalProps {
     productId: string;
     isOpen: boolean;
     onClose: () => void;
+    onReportSuccess: () => void;
 }
 
-const REASONS = [
-    { id: 'illegal', label: 'Хууль бус бараа (Хар тамхи, зэвсэг г.м)', icon: AlertTriangle },
-    { id: 'scam', label: 'Залилан / Хуурамч бараа', icon: AlertTriangle },
-    { id: 'spam', label: 'Спам / Давхардсан зар', icon: Flag },
-    { id: 'other', label: 'Бусад шалтгаан', icon: Flag },
-];
+export default function ReportModal({ productId, isOpen, onClose, onReportSuccess }: ReportModalProps) {
+    const [selectedReason, setSelectedReason] = useState<ReportReason | ''>('');
+    const [reportDescription, setReportDescription] = useState('');
+    const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+    const [message, setMessage] = useState('');
 
-export default function ReportModal({ productId, isOpen, onClose }: ReportModalProps) {
-    const [selectedReason, setSelectedReason] = useState<string>("");
-    const [description, setDescription] = useState("");
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [success, setSuccess] = useState(false);
-
-    if (!isOpen) return null;
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const submitReport = async () => {
         if (!selectedReason) return;
 
-        setIsSubmitting(true);
+        setStatus('loading');
+
         try {
-            // Call Server Action
-            // Note: If you are using the mock version, you might need to adapt this.
-            // For now, we assume the server action is wired up.
-            const result = await reportProduct(productId, selectedReason, description);
+            const result = await reportProduct(productId, selectedReason, reportDescription);
 
             if (result.success) {
-                setSuccess(true);
+                setStatus('success');
+                setMessage(result.message || 'Таны мэдээлэл амжилттай илгээгдлээ.');
+                onReportSuccess();
                 setTimeout(() => {
                     onClose();
-                    setSuccess(false);
-                    setSelectedReason("");
-                    setDescription("");
+                    setStatus('idle');
+                    setSelectedReason('');
+                    setReportDescription('');
                 }, 2000);
             } else {
-                alert(result.error || "Алдаа гарлаа");
+                setStatus('error');
+                setMessage(result.message || 'Алдаа гарлаа. Дахин оролдоно уу.');
             }
-        } catch (error) {
-            console.error(error);
-            alert("Алдаа гарлаа.");
-        } finally {
-            setIsSubmitting(false);
+        } catch (err) {
+            setStatus('error');
+            setMessage('Алдаа гарлаа. Дахин оролдоно уу.');
+            if (process.env.NODE_ENV === 'development') {
+                console.error("Report error:", err);
+            }
         }
     };
 
-    return (
-        <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4" onClick={onClose}>
-            <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative" onClick={e => e.stopPropagation()}>
-                <button
-                    onClick={onClose}
-                    className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full"
-                >
-                    <X className="w-5 h-5 text-gray-500" />
-                </button>
+    if (!isOpen) return null;
 
-                {success ? (
-                    <div className="text-center py-8">
+    return (
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in"
+            onClick={onClose}
+        >
+            <div
+                className="bg-white rounded-2xl w-full max-w-md overflow-hidden animate-slide-up"
+                onClick={(e) => e.stopPropagation()}
+            >
+                {status === 'success' ? (
+                    <div className="p-8 text-center">
                         <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Flag className="w-8 h-8 text-green-600" />
+                            <CheckCircle className="w-8 h-8 text-green-500" />
                         </div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">Мэдээлэл илгээгдлээ</h3>
-                        <p className="text-gray-600">Бид таны мэдээллийг шалгах болно.</p>
+                        <h3 className="font-bold text-lg text-gray-900 mb-2">Баярлалаа!</h3>
+                        <p className="text-gray-600">{message}</p>
                     </div>
                 ) : (
                     <>
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                                <Flag className="w-5 h-5 text-red-600" />
+                        <div className="p-4 border-b flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <Flag className="w-5 h-5 text-orange-500" />
+                                <h2 className="font-bold text-lg">Бүтээгдэхүүн мэдээлэх</h2>
                             </div>
-                            <h3 className="text-lg font-bold text-gray-900">Зар мэдээлэх</h3>
+                            <button
+                                onClick={onClose}
+                                aria-label="Close report modal"
+                                className="p-1 hover:bg-gray-100 rounded-full"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-gray-700">Шалтгаан сонгох</label>
-                                <div className="grid gap-2">
-                                    {REASONS.map((reason) => (
+                        <div className="p-4 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Шалтгаан сонгох *
+                                </label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {Object.entries(REPORT_REASONS).map(([key, value]) => (
                                         <button
-                                            key={reason.id}
-                                            type="button"
-                                            onClick={() => setSelectedReason(reason.id)}
-                                            className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${selectedReason === reason.id
-                                                ? "border-red-500 bg-red-50 text-red-700"
-                                                : "border-gray-200 hover:bg-gray-50 text-gray-700"
+                                            key={key}
+                                            onClick={() => setSelectedReason(key as ReportReason)}
+                                            className={`p-3 rounded-xl text-sm font-medium transition-all border ${selectedReason === key
+                                                ? 'bg-orange-50 border-orange-500 text-orange-700'
+                                                : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
                                                 }`}
                                         >
-                                            <reason.icon className={`w-5 h-5 ${selectedReason === reason.id ? "text-red-500" : "text-gray-400"}`} />
-                                            <span className="font-medium">{reason.label}</span>
+                                            {value.labelMn}
                                         </button>
                                     ))}
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-gray-700">Нэмэлт тайлбар (Заавал биш)</label>
+                            <div>
+                                <label htmlFor="report-description" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Нэмэлт тайлбар (заавал биш)
+                                </label>
                                 <textarea
-                                    value={description}
-                                    onChange={(e) => setDescription(e.target.value)}
-                                    rows={3}
-                                    className="w-full rounded-xl border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-sm"
-                                    placeholder="Дэлгэрэнгүй мэдээлэл..."
+                                    id="report-description"
+                                    value={reportDescription}
+                                    onChange={(e) => setReportDescription(e.target.value)}
+                                    className="w-full p-3 border rounded-xl h-20 resize-none text-sm"
+                                    placeholder="Дэлгэрэнгүй тайлбар бичих..."
                                 />
                             </div>
 
+                            {status === 'error' && (
+                                <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex gap-2">
+                                    <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                                    <p className="text-sm text-red-700">{message}</p>
+                                </div>
+                            )}
+
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3">
+                                <p className="text-xs text-yellow-800">
+                                    <strong>⚠️ Анхааруулга:</strong> 15+ хүн мэдээлвэл бүтээгдэхүүн автоматаар нуугдана.
+                                    Худал мэдээлэл өгвөл таны аккаунтад хязгаарлалт тавигдаж болно.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="p-4 border-t flex gap-2">
                             <button
-                                type="submit"
-                                disabled={!selectedReason || isSubmitting}
-                                className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors ${!selectedReason || isSubmitting
-                                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                    : "bg-red-600 text-white hover:bg-red-700"
-                                    }`}
+                                onClick={onClose}
+                                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold"
                             >
-                                {isSubmitting ? (
-                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                Болих
+                            </button>
+                            <button
+                                onClick={submitReport}
+                                disabled={!selectedReason || status === 'loading'}
+                                className="flex-1 py-3 bg-orange-500 text-white rounded-xl font-bold disabled:opacity-50 flex items-center justify-center gap-2"
+                            >
+                                {status === 'loading' ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                        Илгээж байна...
+                                    </>
                                 ) : (
-                                    "Илгээх"
+                                    <>
+                                        <Flag className="w-4 h-4" />
+                                        Мэдээлэх
+                                    </>
                                 )}
                             </button>
-                        </form>
+                        </div>
                     </>
                 )}
             </div>
