@@ -3,8 +3,16 @@ import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   images: {
-    // Enable image optimization
+    // Enable image optimization for non-R2 images only
     formats: ['image/avif', 'image/webp'],
+
+    // Reduce image sizes to lower optimization costs
+    deviceSizes: [640, 750, 828, 1080, 1200],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256],
+
+    // IMPORTANT: Use unoptimized for R2 images to avoid Vercel Image Optimization bills
+    // R2 already serves optimized images with CDN caching
+    unoptimized: process.env.NODE_ENV === 'production',
 
     remotePatterns: [
       {
