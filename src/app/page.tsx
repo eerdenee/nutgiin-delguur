@@ -163,7 +163,7 @@ function HomeContent() {
   }, [debouncedSearchQuery, selectedAimag, selectedSoum, selectedCategory, sortBy, products]);
 
   return (
-    <main className="min-h-screen bg-gray-50 pb-20">
+    <main id="main-content" className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
 
       {/* Hero Section */}
       <div className="bg-primary px-4 pt-6 pb-8 rounded-b-[2.5rem] shadow-sm">
@@ -226,6 +226,7 @@ function HomeContent() {
                 placeholder="Хайх зүйлээ бичнэ үү..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                aria-label="Бүтээгдэхүүн хайх"
                 className="w-full pl-12 pr-4 py-3.5 rounded-2xl border-none focus:ring-2 focus:ring-black/20 bg-white text-gray-900 placeholder:text-gray-400"
               />
             </div>

@@ -118,7 +118,15 @@ export default function RootLayout({
             </head>
             <body
                 className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} antialiased bg-background text-foreground`}
+                suppressHydrationWarning
             >
+                {/* Skip Navigation Link for Accessibility */}
+                <a
+                    href="#main-content"
+                    className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-primary focus:text-secondary focus:rounded-lg focus:font-bold focus:shadow-lg"
+                >
+                    Үндсэн агуулга руу алгасах
+                </a>
                 <CountryProvider>
                     {children}
                     <Footer />

@@ -79,13 +79,16 @@ export default function LocationSelector({
                     setIsOpen(false);
                 }
             }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="location-modal-title"
         >
             <div
-                className="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-10 duration-300"
+                className="bg-white dark:bg-gray-800 w-full max-w-md rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-10 duration-300"
             >
                 {/* Header */}
-                <div className="p-4 border-b flex items-center justify-between bg-gray-50">
-                    <h2 className="text-lg font-bold text-gray-900">Байршил сонгох</h2>
+                <div className="p-4 border-b dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-700">
+                    <h2 id="location-modal-title" className="text-lg font-bold text-gray-900 dark:text-white">Байршил сонгох</h2>
                     <button
                         onClick={() => setIsOpen(false)}
                         className="p-2 hover:bg-gray-200 rounded-full transition-colors"

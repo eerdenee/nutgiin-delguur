@@ -5,7 +5,7 @@ export default function Footer() {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer className="bg-white border-t border-gray-200 pt-12 pb-8">
+        <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 pt-12 pb-8">
             <div className="max-w-4xl mx-auto px-4">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
                     {/* Brand & Contact */}
@@ -31,7 +31,7 @@ export default function Footer() {
 
                     {/* Quick Links */}
                     <div>
-                        <h3 className="font-bold text-gray-900 mb-4">Үндсэн цэс</h3>
+                        <h3 className="font-bold text-gray-900 dark:text-white mb-4">Үндсэн цэс</h3>
                         <ul className="space-y-2 text-sm text-gray-600">
                             <li><Link href="/" className="hover:text-primary transition-colors">Нүүр хуудас</Link></li>
                             <li><Link href="/dashboard/post" className="hover:text-primary transition-colors">Зар оруулах</Link></li>
@@ -42,7 +42,7 @@ export default function Footer() {
 
                     {/* Support & Legal */}
                     <div>
-                        <h3 className="font-bold text-gray-900 mb-4">Тусламж</h3>
+                        <h3 className="font-bold text-gray-900 dark:text-white mb-4">Тусламж</h3>
                         <ul className="space-y-2 text-sm text-gray-600">
                             <li><Link href="/help" className="hover:text-primary transition-colors">Түгээмэл асуулт</Link></li>
                             <li><Link href="/safety" className="hover:text-primary transition-colors flex items-center gap-1"><ShieldCheck className="w-3 h-3" /> Аюулгүй ажиллагаа</Link></li>
@@ -54,7 +54,7 @@ export default function Footer() {
 
                     {/* Socials */}
                     <div>
-                        <h3 className="font-bold text-gray-900 mb-4">Биднийг дагаарай</h3>
+                        <h3 className="font-bold text-gray-900 dark:text-white mb-4">Биднийг дагаарай</h3>
                         <div className="flex gap-4" role="group" aria-label="Сошиал сүлжээ холбоосууд">
                             <a
                                 href="#"
@@ -81,7 +81,7 @@ export default function Footer() {
                     </div>
                 </div>
 
-                <div className="border-t border-gray-100 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-500">
+                <div className="border-t border-gray-100 dark:border-gray-700 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-500 dark:text-gray-400">
                     <p>&copy; {currentYear} Nutgiin Delguur. Бүх эрх хуулиар хамгаалагдсан.</p>
                     <div className="flex gap-4">
                         <Link href="/terms" className="hover:text-gray-900">Нууцлалын бодлого</Link>

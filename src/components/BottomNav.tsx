@@ -16,7 +16,7 @@ export default function BottomNav() {
         <nav
             role="navigation"
             aria-label="Үндсэн навигаци"
-            className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 pb-safe z-50 md:hidden"
+            className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-4 py-2 pb-safe z-50 md:hidden"
         >
             <div className="flex items-end justify-around">
                 <Link href="/" className={`flex flex-col items-center justify-center gap-0.5 ${isActive("/") ? "text-primary-dark" : "text-gray-400"}`}>
