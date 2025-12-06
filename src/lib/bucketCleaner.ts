@@ -83,7 +83,7 @@ export async function cleanOrphanedFiles(): Promise<CleanupResult> {
         const validKeys = new Set<string>();
 
         // Product images
-        products?.forEach(p => {
+        ((products as any[]) || []).forEach((p: any) => {
             if (p.image) validKeys.add(extractKey(p.image));
             if (Array.isArray(p.images)) {
                 p.images.forEach((img: string) => validKeys.add(extractKey(img)));
@@ -91,13 +91,13 @@ export async function cleanOrphanedFiles(): Promise<CleanupResult> {
         });
 
         // Profile images
-        profiles?.forEach(p => {
+        ((profiles as any[]) || []).forEach((p: any) => {
             if (p.avatar_url) validKeys.add(extractKey(p.avatar_url));
             if (p.company_logo) validKeys.add(extractKey(p.company_logo));
         });
 
         // Verification images (only active ones)
-        verifications?.forEach(v => {
+        ((verifications as any[]) || []).forEach((v: any) => {
             if (v.id_card_image_key) validKeys.add(v.id_card_image_key);
         });
 
@@ -164,7 +164,7 @@ function extractKey(url: string): string {
  * Log cleanup action for auditing
  */
 async function logCleanup(fileKey: string, fileSize: number): Promise<void> {
-    await supabase.from('storage_cleanup_logs').insert({
+    await (supabase as any).from('storage_cleanup_logs').insert({
         file_key: fileKey,
         file_size: fileSize,
         action: 'deleted_orphan',

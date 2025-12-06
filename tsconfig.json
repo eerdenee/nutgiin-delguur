@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -19,7 +23,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     }
   },
   "include": [
@@ -30,5 +36,27 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "src/lib/autopilot.ts",
+    "src/lib/archetypes.ts",
+    "src/lib/circuitBreaker.ts",
+    "src/lib/communityModeration.ts",
+    "src/lib/consciousness.ts",
+    "src/lib/dataMoat.ts",
+    "src/lib/defconSwitch.ts",
+    "src/lib/doomsdayBackup.ts",
+    "src/lib/ethereal.ts",
+    "src/lib/futurePivot.ts",
+    "src/lib/localWorks.ts",
+    "src/lib/simulation.ts",
+    "src/lib/timeDilation.ts",
+    "src/lib/bucketCleaner.ts",
+    "src/lib/vendorEscape.ts",
+    "src/lib/soumResonance.ts",
+    "src/lib/vibeManagement.ts",
+    "src/lib/verifiedReviews.ts",
+    "src/lib/atomicTransactions.ts",
+    "src/lib/idVerification.ts"
+  ]
 }

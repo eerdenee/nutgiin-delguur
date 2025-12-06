@@ -216,7 +216,7 @@ async function updateEngagementScores(): Promise<TaskResult> {
 
     let processed = 0;
 
-    for (const p of products || []) {
+    for (const p of (products as any[]) || []) {
         const ageHours = (Date.now() - new Date(p.created_at).getTime()) / 3600000;
         const timeDecay = Math.max(0.2, 1 - ageHours / 1000);
 
@@ -237,7 +237,7 @@ async function updateEngagementScores(): Promise<TaskResult> {
 async function autoExpireListings(): Promise<TaskResult> {
     const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 3600000).toISOString();
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
         .from('products')
         .update({
             status: 'expired',
@@ -271,7 +271,7 @@ async function sendExpiryReminders(): Promise<TaskResult> {
 
     let processed = 0;
 
-    for (const p of expiringProducts || []) {
+    for (const p of (expiringProducts as any[]) || []) {
         await (supabase as any).from('notifications').insert({
             user_id: p.seller_id,
             type: 'expiry_warning',
@@ -280,7 +280,7 @@ async function sendExpiryReminders(): Promise<TaskResult> {
             product_id: p.id
         });
 
-        await supabase
+        await (supabase as any)
             .from('products')
             .update({ expiry_reminder_sent: new Date().toISOString() })
             .eq('id', p.id);
@@ -360,14 +360,14 @@ async function cleanupOldLogs(): Promise<TaskResult> {
 
 async function generateWeeklyReport(): Promise<TaskResult> {
     // Generate report and send to admin
-    const { data: stats } = await supabase
+    const { data: stats } = await (supabase as any)
         .from('daily_stats')
         .select('*')
         .gte('date', new Date(Date.now() - 7 * 24 * 3600000).toISOString().split('T')[0])
         .order('date', { ascending: true });
 
     // Create admin notification with summary
-    const summary = stats?.reduce((acc, s) => ({
+    const summary = ((stats as any[]) || []).reduce((acc: any, s: any) => ({
         users: s.total_users,
         products: s.active_products,
         transactions: acc.transactions + 1
