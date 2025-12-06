@@ -31,7 +31,7 @@ export async function scheduleIdImageDeletion(
     status: 'approved' | 'rejected'
 ): Promise<void> {
     // 1. Update verification record
-    const { error } = await supabase
+    const { error } = await (supabase as any)
         .from('id_verifications')
         .update({
             verified_at: new Date().toISOString(),

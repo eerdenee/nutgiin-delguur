@@ -114,7 +114,7 @@ export async function logConnection(
     productId: string,
     connectionType: 'call' | 'message' | 'copy_phone'
 ): Promise<void> {
-    await supabase.from('connection_logs').insert({
+    await (supabase as any).from('connection_logs').insert({
         viewer_id: viewerId,
         seller_id: sellerId,
         product_id: productId,
@@ -261,7 +261,7 @@ export async function runPaymentReconciliation(): Promise<{
             verified++;
         } else if (result.status === 'mismatch' || result.status === 'not_received') {
             // Flag for manual review
-            await supabase.from('admin_alerts').insert({
+            await (supabase as any).from('admin_alerts').insert({
                 type: 'PAYMENT_MISMATCH',
                 reason: `Transaction ${payment.reference}: Expected ${payment.amount}, Got ${result.actualAmount}`,
                 severity: 'high',
@@ -289,7 +289,7 @@ export async function logPaymentEvent(
     amount: number,
     details?: any
 ): Promise<void> {
-    await supabase.from('payment_ledger').insert({
+    await (supabase as any).from('payment_ledger').insert({
         transaction_id: transactionId,
         event_type: eventType,
         amount,
@@ -373,7 +373,7 @@ export async function trackHumanVisit(
         return;
     }
 
-    await supabase.from('human_visits').insert({
+    await (supabase as any).from('human_visits').insert({
         user_id: userId,
         session_id: sessionId,
         confidence: humanMetrics.confidence,

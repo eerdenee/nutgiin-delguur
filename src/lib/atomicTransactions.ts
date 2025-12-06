@@ -20,7 +20,8 @@ export async function atomicVIPPurchase(
 ): Promise<{ success: boolean; message: string; transactionId?: string }> {
 
     // Use Supabase RPC to execute atomic transaction
-    const { data, error } = await supabase.rpc('atomic_vip_purchase', {
+    // Cast to 'any' to bypass missing RPC type definitions
+    const { data, error } = await (supabase as any).rpc('atomic_vip_purchase', {
         p_product_id: productId,
         p_user_id: userId,
         p_location_aimag: locationAimag,
@@ -62,7 +63,8 @@ export async function atomicDecrementInventory(
     quantity: number = 1
 ): Promise<{ success: boolean; remainingStock: number }> {
 
-    const { data, error } = await supabase.rpc('atomic_decrement_stock', {
+    // Cast to 'any' to bypass missing RPC type definitions
+    const { data, error } = await (supabase as any).rpc('atomic_decrement_stock', {
         p_product_id: productId,
         p_quantity: quantity
     });
@@ -90,7 +92,8 @@ export async function reserveSlotWithTimeout(
 
     const expiresAt = new Date(Date.now() + timeoutSeconds * 1000).toISOString();
 
-    const { data, error } = await supabase
+    // Cast to 'any' to bypass missing table type definitions
+    const { data, error } = await (supabase as any)
         .from('resource_reservations')
         .insert({
             resource_type: resourceType,
@@ -125,7 +128,7 @@ export async function completeReservation(
     reservationId: string
 ): Promise<{ success: boolean }> {
 
-    const { error } = await supabase
+    const { error } = await (supabase as any)
         .from('resource_reservations')
         .update({
             status: 'completed',
@@ -141,7 +144,7 @@ export async function completeReservation(
  * Cancel expired reservations (cron job, every minute)
  */
 export async function cleanupExpiredReservations(): Promise<number> {
-    const { data, error } = await supabase
+    const { data } = await (supabase as any)
         .from('resource_reservations')
         .update({ status: 'expired' })
         .eq('status', 'pending')
