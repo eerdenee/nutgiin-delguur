@@ -211,14 +211,32 @@ Current test coverage: ~15% (auth, subscription modules)
 | `npm start` | Start production server |
 | `npm test` | Run tests |
 | `npm run lint` | Run ESLint |
+| `npm run ouroboros` | 🐍 Run full system validation cycle |
 
 ---
 
 ## 📝 Documentation
 
 - [Env Setup Guide](./ENV_SETUP.md)
-- [Audit Reports](./ENTROPY_AUDIT_REPORT.md) - 7-level comprehensive analysis
 - [Database Schema](./supabase/schema.sql)
+
+### 📚 The Akashic Records (Audit History)
+Full transparency of the system's evolution through 14 Levels of Enlightenment:
+
+1. [Entropy (Chaos)](./ENTROPY_AUDIT_REPORT.md)
+2. [Multiverse (Dimensions)](./MULTIVERSE_AUDIT_REPORT.md)
+3. [Singularity (Optimizations)](./SINGULARITY_AUDIT_REPORT.md)
+4. [Time Dilation (Performance)](./TIME_DILATION_AUDIT_REPORT.md)
+5. [Event Horizon (Security)](./EVENT_HORIZON_AUDIT_REPORT.md)
+6. [Consciousness (Architecture)](./CONSCIOUSNESS_AUDIT_REPORT.md)
+7. [Genesis (Philosophy)](./GENESIS_AUDIT_REPORT.md)
+8. [The Void (Deep Logic)](./THE_VOID_AUDIT_REPORT.md)
+9. [The Potentiality (Future)](./THE_POTENTIALITY_AUDIT_REPORT.md)
+10. [The Simulation (Chaos Test)](./THE_SIMULATION_AUDIT_REPORT.md)
+11. [The Archetype (Identity)](./THE_ARCHETYPE_AUDIT_REPORT.md)
+12. [The Ethereal (Flow)](./THE_ETHEREAL_AUDIT_REPORT.md)
+13. [The Ouroboros (Cycle)](./THE_OUROBOROS_AUDIT_REPORT.md)
+14. [The Nirvana (Release)](./THE_NIRVANA_AUDIT_REPORT.md)
 
 ---
 
