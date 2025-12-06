@@ -163,7 +163,7 @@ function HomeContent() {
   }, [debouncedSearchQuery, selectedAimag, selectedSoum, selectedCategory, sortBy, products]);
 
   return (
-    <main id="main-content" className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
+    <main id="main-content" className="min-h-screen bg-[var(--background)] pb-20">
 
       {/* Hero Section */}
       <div className="bg-primary px-4 pt-6 pb-8 rounded-b-[2.5rem] shadow-sm">
