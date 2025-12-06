@@ -215,6 +215,10 @@ export async function getSerendipitySuggestions(
     currentCategory?: string,
     currentAimag?: string
 ): Promise<any[]> {
+    if (!currentCategory || !currentAimag) {
+        return [];
+    }
+
     // Get items from DIFFERENT category but SAME location
     // This creates unexpected discoveries
 
@@ -238,7 +242,7 @@ export async function getSerendipitySuggestions(
         .order('created_at', { ascending: false })
         .limit(2);
 
-    return [...(localDifferent || []), ...(distantSimilar || [])];
+    return [...((localDifferent as any[]) || []), ...((distantSimilar as any[]) || [])];
 }
 
 /**
@@ -259,7 +263,7 @@ export async function getDailyTreasure(userId: string): Promise<{
         .single();
 
     if (seen) {
-        return { item: seen.product_data, message: 'Өнөөдрийн эрдэнэс', isNew: false };
+        return { item: (seen as any).product_data, message: 'Өнөөдрийн эрдэнэс', isNew: false };
     }
 
     // Find a random interesting item
@@ -272,7 +276,7 @@ export async function getDailyTreasure(userId: string): Promise<{
 
     if (!products || products.length === 0) return null;
 
-    const randomItem = products[Math.floor(Math.random() * products.length)];
+    const randomItem = (products as any[])[Math.floor(Math.random() * products.length)];
 
     // Record view
     await supabase.from('treasure_views').insert({
@@ -319,7 +323,7 @@ export async function getPublicJudgments(limit: number = 5): Promise<PublicJudgm
     // Get report counts for banned users
     const judgments: PublicJudgment[] = [];
 
-    for (const user of bans || []) {
+    for (const user of (bans as any[]) || []) {
         const { count } = await supabase
             .from('reports')
             .select('*', { count: 'exact' })
@@ -412,7 +416,7 @@ export async function getCommunityTrustScore(userId: string): Promise<{
     badges: string[];
 }> {
     const [
-        { data: profile },
+        { data: profileData },
         { count: reportCount },
         { count: endorsementCount }
     ] = await Promise.all([
@@ -420,6 +424,8 @@ export async function getCommunityTrustScore(userId: string): Promise<{
         supabase.from('reports').select('*', { count: 'exact' }).eq('reported_user_id', userId),
         supabase.from('seller_endorsements').select('*', { count: 'exact' }).eq('seller_id', userId)
     ]);
+
+    const profile = profileData as any;
 
     if (!profile) {
         return { score: 0, level: 'normal', badges: [] };
