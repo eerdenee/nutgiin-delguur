@@ -11,23 +11,17 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { MOCK_PRODUCTS, CATEGORIES, CATEGORY_GRAMMAR, type Product } from "@/lib/data";
 import { isAdExpired } from "@/lib/subscription";
 import { isProductVisible } from "@/lib/moderation";
+import { useDebounce } from "@/hooks/useDebounce";
 
 function HomeContent() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [selectedAimag, setSelectedAimag] = useState<string | undefined>();
   const [selectedSoum, setSelectedSoum] = useState<string | undefined>();
   const [sortBy, setSortBy] = useState<"engagement" | "newest" | "price_asc">("engagement");
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>();
 
-  // Debounce Search Query
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
+  // Debounce Search Query using custom hook
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategory(prev => prev === categoryId ? undefined : categoryId);
