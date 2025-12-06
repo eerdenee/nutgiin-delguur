@@ -29,25 +29,6 @@ cd nutgiin-delguur
 git checkout -b feature/your-feature-name
 # or
 git checkout -b fix/your-bug-fix
-```
-
-### 4. Make Your Changes
-
-Follow the code style and conventions used in the project.
-
-### 5. Test Your Changes
-
-```bash
-npm test
-npm run lint
-npm run dev
-```
-
-### 6. Commit Your Changes
-
-Use conventional commit messages:
-
-```bash
 git commit -m "✨ Add: new feature description"
 git commit -m "🐛 Fix: bug description"
 git commit -m "📝 Docs: documentation update"
