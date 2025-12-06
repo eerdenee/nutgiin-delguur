@@ -237,6 +237,9 @@ Full transparency of the system's evolution through 14 Levels of Enlightenment:
 12. [The Ethereal (Flow)](./THE_ETHEREAL_AUDIT_REPORT.md)
 13. [The Ouroboros (Cycle)](./THE_OUROBOROS_AUDIT_REPORT.md)
 14. [The Nirvana (Release)](./THE_NIRVANA_AUDIT_REPORT.md)
+15. [The Absolute (Axioms)](./THE_ABSOLUTE_AUDIT_REPORT.md)
+16. [The Null (Cleanliness)](./THE_NULL_AUDIT_REPORT.md)
+17. [The Legacy (History)](./LEGACY.md)
 
 ---
 
@@ -262,6 +265,11 @@ npm start
 
 ## 🤝 Contributing
 
+Thank you for your interest in contributing to **Нутгийн Дэлгүүр**! 
+
+> 📜 **Before you start:** Please read [The Legacy](./LEGACY.md) to understand the spirit of this project.
+
+This document provides guidelines for contributing to the project.
 Contributions are welcome! Please follow these steps:
 
 1. Fork the repository

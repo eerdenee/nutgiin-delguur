@@ -1,6 +1,10 @@
 # Contributing to Нутгийн Дэлгүүр
 
-Thank you for your interest in contributing to **Нутгийн Дэлгүүр**! This document provides guidelines for contributing to the project.
+Thank you for your interest in contributing to **Нутгийн Дэлгүүр**! 
+
+> 📜 **Before you start:** Please read [The Legacy](./LEGACY.md) to understand the spirit of this project.
+
+This document provides guidelines for contributing to the project.
 
 ## 🌟 Ways to Contribute
 
