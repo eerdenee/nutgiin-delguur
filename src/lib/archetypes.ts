@@ -177,7 +177,7 @@ export async function getRareFinds(userAimag?: string): Promise<RareFind[]> {
         '🏆 Collector\'s item'
     ];
 
-    return (products || []).map((p, i) => ({
+    return ((products as any[]) || []).map((p, i) => ({
         id: p.id,
         title: p.title,
         description: p.description?.slice(0, 100) || '',
