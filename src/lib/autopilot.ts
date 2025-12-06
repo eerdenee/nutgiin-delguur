@@ -128,7 +128,7 @@ export const AUTOMATED_TASKS: AutomatedTask[] = [
 // ============================================
 
 async function cleanupExpiredReservations(): Promise<TaskResult> {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
         .from('resource_reservations')
         .update({ status: 'expired' })
         .eq('status', 'pending')
@@ -155,7 +155,7 @@ async function processPendingPayments(): Promise<TaskResult> {
 
     // Log for admin attention
     if (data && data.length > 0) {
-        await supabase.from('admin_alerts').insert({
+        await (supabase as any).from('admin_alerts').insert({
             type: 'PENDING_PAYMENTS',
             reason: `${data.length} төлбөр 24+ цаг хүлээж байна`,
             severity: 'medium'
@@ -172,7 +172,7 @@ async function processPendingPayments(): Promise<TaskResult> {
 async function sendScheduledNotifications(): Promise<TaskResult> {
     const now = new Date().toISOString();
 
-    const { data: notifications } = await supabase
+    const { data: notifications } = await (supabase as any)
         .from('scheduled_notifications')
         .select('*')
         .eq('status', 'pending')
@@ -184,7 +184,7 @@ async function sendScheduledNotifications(): Promise<TaskResult> {
     for (const notif of notifications || []) {
         try {
             // Create actual notification
-            await supabase.from('notifications').insert({
+            await (supabase as any).from('notifications').insert({
                 user_id: notif.user_id,
                 type: notif.notification_type,
                 title: 'Мэдэгдэл',
@@ -192,7 +192,7 @@ async function sendScheduledNotifications(): Promise<TaskResult> {
             });
 
             // Mark as sent
-            await supabase
+            await (supabase as any)
                 .from('scheduled_notifications')
                 .update({ status: 'sent', sent_at: now })
                 .eq('id', notif.id);
@@ -272,7 +272,7 @@ async function sendExpiryReminders(): Promise<TaskResult> {
     let processed = 0;
 
     for (const p of expiringProducts || []) {
-        await supabase.from('notifications').insert({
+        await (supabase as any).from('notifications').insert({
             user_id: p.seller_id,
             type: 'expiry_warning',
             title: '⏰ Зарын хугацаа дуусах гэж байна',
@@ -306,7 +306,7 @@ async function generateDailyStats(): Promise<TaskResult> {
         supabase.from('verified_transactions').select('*', { count: 'exact' })
     ]);
 
-    await supabase.from('daily_stats').upsert({
+    await (supabase as any).from('daily_stats').upsert({
         date: today,
         total_users: users.count || 0,
         active_products: products.count || 0,
@@ -320,7 +320,7 @@ async function generateDailyStats(): Promise<TaskResult> {
 async function autoApproveStaleModeration(): Promise<TaskResult> {
     const oneDayAgo = new Date(Date.now() - 24 * 3600000).toISOString();
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
         .from('moderation_queue')
         .update({
             status: 'approved',
@@ -345,7 +345,7 @@ async function createWeeklyBackup(): Promise<TaskResult> {
 async function cleanupOldLogs(): Promise<TaskResult> {
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 3600000).toISOString();
 
-    const { data: deleted } = await supabase
+    const { data: deleted } = await (supabase as any)
         .from('compliance_logs')
         .delete()
         .lt('timestamp', thirtyDaysAgo)
@@ -373,7 +373,7 @@ async function generateWeeklyReport(): Promise<TaskResult> {
         transactions: acc.transactions + 1
     }), { users: 0, products: 0, transactions: 0 });
 
-    await supabase.from('admin_alerts').insert({
+    await (supabase as any).from('admin_alerts').insert({
         type: 'WEEKLY_REPORT',
         reason: `Долоо хоногийн тайлан: ${summary?.users} хэрэглэгч, ${summary?.products} зар`,
         severity: 'low'
